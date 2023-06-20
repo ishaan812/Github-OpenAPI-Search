@@ -1,12 +1,15 @@
 import express from "express";
 import { Octokit} from "octokit";
 import { activeSearch } from "./searchtools/search.js";
+import dotenv from 'dotenv';
 // import { router as userRoutes } from "./routes/user.routes.js";
+
+dotenv.config();
 
 const app = express();
 const octokit = new Octokit({
-  userAgent: "github-openapi-search/v1.2.3",
-  auth: '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',
+  userAgent: "github-openapi-search/v0.0.1",
+  auth: process.env.GITHUB_API_KEY,
 });
 
 // Should not even be an API endpoint for passive search

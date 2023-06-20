@@ -1,4 +1,6 @@
-import { handleCodeSearch } from "./searchutils.js";
+import { getFileContents, handleCodeSearch } from "./searchutils.js";
+import OASNormalize from 'oas-normalize';
+
 
 export async function activeSearch(prompt:string, repo: string, organisation: string, username: string) : Promise<string> {
     //3 types of searches:
@@ -6,11 +8,28 @@ export async function activeSearch(prompt:string, repo: string, organisation: st
     // If organisation is specified then search through that organisation: /search/code with org name
     // If user is specified then search through that user: /search/code with user name
     // If none is specified then return error
-    const response = await handleCodeSearch(repo, organisation, username, 1);
-  
-    // const fileContents = await getFileContents(repoowner, reponame, filepath);
-    // console.log(Buffer.from(fileContents, 'base64').toString());
-    return response;
+    let validFiles = [];
+    const files = await handleCodeSearch(repo, organisation, username, 1);
+    for(const file of files) {
+        const base64content = await getFileContents(file.repository.owner.login, file.repository.name, file.path);
+        const content = Buffer.from(base64content, 'base64').toString();
+        const oas = new OASNormalize.default(content)
+        oas
+        .validate()
+        .then(definition => {
+          // Definition will always be JSON, and valid.
+        //   console.log(definition);
+            console.log("File "+file.name+" is valid");
+            validFiles.push(definition);
+            console.log(validFiles);
+        })
+        .catch((error) => {
+            // Error will be an array of validation errors.
+            console.log("File "+file.name+" is not valid");
+        })
+    }
+    
+    return files;
 }
 
 

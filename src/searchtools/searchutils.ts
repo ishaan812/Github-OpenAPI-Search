@@ -10,9 +10,10 @@ export async function getFileContents(repoowner: string, reponame: string, filep
     return response.data['content'];
 }
 
-export async function handleCodeSearch(repo: string, organisation: string, username: string, page: number) : Promise<string>{
-    //make search query
-    let query = "swagger language:json OR language:yaml"
+export async function handleCodeSearch(repo: string, organisation: string, username: string, page: number) : Promise<any>{
+    //Why does /(openai|swagger)/ not work :/
+    //Even Parenthesis doesn't work
+    let query = ""
     if (repo != undefined) {
         query += " repo:" + repo;
     } else if (organisation != undefined) {
@@ -22,6 +23,7 @@ export async function handleCodeSearch(repo: string, organisation: string, usern
     } else{
         return "Error: No search parameters specified";
     }
+    query+= " language:json OR language:yaml" 
     
     console.log("Query: "+query)
     //api call handling
@@ -30,7 +32,6 @@ export async function handleCodeSearch(repo: string, organisation: string, usern
         per_page: 100,
         page: page,
     })
-    console.log(results);
-    return "";
+    return results.data.items;
 }
 

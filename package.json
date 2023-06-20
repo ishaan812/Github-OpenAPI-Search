@@ -46,6 +46,7 @@
   "dependencies": {
     "dotenv": "^16.1.4",
     "express": "^4.18.2",
+    "oas-normalize": "^8.4.1",
     "octokit": "^2.0.19",
     "tslib": "~2.5"
   },
