@@ -1,4 +1,3 @@
-
 # GitHub OpenAPI Search
 
 The goal of this project is to provide a robust yet easy way to search Github for Swagger and OpenAPI definitions. Understanding that there is a lot of noise available, that we only care about OpenAPIs that validate, and that the Github API has rate limits that require you to automate the crawling over time. Providing a robust open-source solution that will crawl public Github repositories for machine-readable API definitions.
@@ -6,9 +5,9 @@ The project will consist of developing an open-source API that allows you to pas
 
 ## Tech Stack
 
- - Node JS/Express JS 
- - Typescript
- - Octokit.JS
- - Jest
+- Node JS/Express JS
+- Typescript
+- Octokit.JS
+- Jest
 
 🚧Under Construction
