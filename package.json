@@ -45,7 +45,9 @@
   "license": "Apache-2.0",
   "dependencies": {
     "dotenv": "^16.1.4",
+    "elasticsearch": "^16.7.3",
     "express": "^4.18.2",
+    "fs": "^0.0.1-security",
     "oas-normalize": "^8.4.1",
     "octokit": "^2.0.19",
     "tslib": "~2.5"

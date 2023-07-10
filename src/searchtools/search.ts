@@ -1,4 +1,5 @@
-import { getFileContents, handleCodeSearch } from './searchutils.js';
+import { getFileContents, handleCodeSearch, generateUUID } from './searchutils.js';
+import { BulkStoreToDB } from '../DB/dbutils.js';
 import OASNormalize from 'oas-normalize';
 
 export async function activeSearch(
@@ -6,6 +7,7 @@ export async function activeSearch(
   repo: string,
   organisation: string,
   username: string,
+  esClient: any,
 ): Promise<any> {
   //3 types of searches:
   // If repository is specified, then search through that repository: /search/code with repo name
@@ -26,14 +28,34 @@ export async function activeSearch(
       .validate()
       .then((definition) => {
         console.log('File ' + file.name + ' is valid');
-        validFiles.push(definition);
-        console.log(validFiles);
+        console.log(definition?.info?.title)
+        validFiles.push({index: { _index: 'openapi', _id: generateUUID()}});
+        validFiles.push({title: definition?.info?.title, description: definition?.info?.description, version: definition?.info?.version, servers: JSON.stringify(definition?.servers), paths: JSON.stringify(definition?.paths) , path: file.path, repository: file?.repository?.name, owner: file?.repository?.owner?.login, data: content});
       })
       .catch((error) => {
         // Error will be an array of validation errors.
         console.log('File ' + file.name + ' is not valid');
       });
-  }
-
+    }
+  BulkStoreToDB(validFiles as any[],esClient as any);
   return validFiles;
+}
+
+export async function passiveSearch(
+  query: string,
+  esClient: any,
+): Promise<any> {
+  const result = await esClient.search({
+    index: 'openapi',
+    body: {
+      query: {
+        match: {data: query}
+      }
+    }
+  });
+  if(result.hits.hits.length === 0) {
+    console.log("No results found in database");
+    // activeSearch(query, "", "", "", esClient);
+  } 
+  return result;
 }
