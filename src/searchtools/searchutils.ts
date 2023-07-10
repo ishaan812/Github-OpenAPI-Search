@@ -1,5 +1,20 @@
 import { octokit } from '../app.js';
 // import { CodeSearchResponse } from "./searchstructs.js";
+import crypto from "crypto";
+
+export function generateUUID() {
+  // Generate a random buffer of 16 bytes
+  const buffer = crypto.randomBytes(16);
+
+  // Set the version (4) and variant (2) bits
+  buffer[6] = (buffer[6] & 0x0f) | 0x40;
+  buffer[8] = (buffer[8] & 0x3f) | 0x80;
+
+  // Convert the buffer to a string representation of the UUID
+  const uuid = buffer.toString('hex').match(/(.{8})(.{4})(.{4})(.{4})(.{12})/);
+  uuid.shift();
+  return uuid.join('-');
+}
 
 export async function getFileContents(
   repoowner: string,
@@ -27,7 +42,7 @@ export async function handleCodeSearch(
   //Why does /(openai|swagger)/ not work :/
   //Even Parenthesis doesn't work
   let query = prompt + ' AND "openapi: 3"';
-  //   query+= prompt + ' AND "swagger: \\"2"'
+    // query+= prompt + ' AND "swagger: \\"2"'
   if (repo != undefined) {
     query += '+repo:' + repo;
   } else if (organisation != undefined) {
