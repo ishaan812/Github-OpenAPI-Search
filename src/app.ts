@@ -27,7 +27,7 @@ const esClient = new es.Client({
 app.use('/passive', async (_req, _res) => {
   const query = _req.query.q as string;
   const results = await passiveSearch(query, esClient);
-  _res.send(results.hits.hits);
+  _res.send(results);
 })
 
 app.use('/search', async (_req, _res) => {

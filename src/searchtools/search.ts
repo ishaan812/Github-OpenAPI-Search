@@ -45,17 +45,39 @@ export async function passiveSearch(
   query: string,
   esClient: any,
 ): Promise<any> {
-  const result = await esClient.search({
-    index: 'openapi',
-    body: {
-      query: {
-        match: {data: query}
-      }
+  try {
+    if (esClient === undefined) {
+      throw new Error('Invalid Elasticsearch client');
     }
-  });
-  if(result.hits.hits.length === 0) {
-    console.log("No results found in database");
-    // activeSearch(query, "", "", "", esClient);
-  } 
-  return result;
+    const result = await esClient.search({
+      index: 'openapi',
+      body: {
+        query: {
+          match: { data: query },
+        },
+      },
+    });
+
+    if (result.hits.hits) {
+      if (result.hits.hits.length === 0) {
+        console.log('No results found in the database');
+        // activeSearch(query, "", "", "", esClient);
+      }
+      return result.hits.hits;
+    }
+  } catch (error) {
+    if (error.message.includes('No Living connections')) {
+      console.log('Elasticsearch connection error:', error);
+      return error
+    } else {
+      console.log('Error occurred during passive search:', error);
+      return error; 
+    }
+  }
+
+  return 'Database not found';
 }
+
+
+
+
