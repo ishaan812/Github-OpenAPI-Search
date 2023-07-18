@@ -23,9 +23,19 @@ Dependancies: NodeJS, npm, GithubAPIKey
 5.  On another terminal, run `npm run start` to start the server on the port specified on. 
 6.  Now the nodejs server should be running! To test it just go to `localhost:{{PORT}}` and the text `TypeScript With Express` should be returned.
 
+## Setting up ElasticSearch Runbook (Dev/Local)
+-**docker pull docker.elastic.co/elasticsearch/elasticsearch:8.8.2** 
+-**docker network create elastic**
+-**docker run \ 
+    -p 9200:9200 \
+    -p 9300:9300 \
+    -e "discovery.type=single-node" \
+    -e "xpack.security.enabled=false" \
+    docker.elastic.co/elasticsearch/elasticsearch:8.8.2**
+
 ## API Endpoints
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/19841716-f1801bb7-b189-429b-a875-91b115d349a2?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D19841716-f1801bb7-b189-429b-a875-91b115d349a2%26entityType%3Dcollection%26workspaceId%3D5ebe19fb-61d4-47a7-9cae-de3834853f6b)
  - **/search?prompt={{prompt}}** : The active search endpoint. Add the search prompt in the prompt variable in query params.
-
+ - **/passive?q={}** : The passive search endpoint. Add the search prompt in the query param (q) to query the database.
 
 🚧Under Construction
