@@ -8,10 +8,10 @@ import { checkClusterHealth } from './DB/dbutils.js';
 import { throttling } from '@octokit/plugin-throttling'
 import { retry } from '@octokit/plugin-retry'
 
+
+
 const CustomOctokit = Octokit.plugin(throttling as any, retry as any);
 dotenv.config();
-
-const app = express();
 
 const octokit = new CustomOctokit({
   userAgent: 'github-openapi-search/v0.0.1',
@@ -32,6 +32,10 @@ const octokit = new CustomOctokit({
     },
   },
 });
+
+const app = express();
+
+
 
 const esClient = new es.Client({
   host: 'http://localhost:9200',

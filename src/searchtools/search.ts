@@ -1,5 +1,8 @@
-import { handleCodeSearch, validateFiles} from './searchutils.js';
-import { BulkStoreToDB } from '../DB/dbutils.js';
+import { queryBuilder, ValidateandStoreFiles, finishedCount} from './searchutils.js';
+import { octokit } from '../app.js';
+
+
+let processCount = 0;
 
 export async function activeSearch(
   prompt: string,
@@ -8,14 +11,33 @@ export async function activeSearch(
   username: string,
   esClient: any,
 ): Promise<any> {
-  //3 types of searches:
-  // If repository is specified, then search through that repository: /search/code with repo name
-  // If organisation is specified then search through that organisation: /search/code with org name
-  // If user is specified then search through that user: /search/code with user name
-  // If none is specified then return error
-  const files = await handleCodeSearch(prompt, repo, organisation, username, 1);
-  const validFiles= await validateFiles(files);
-  BulkStoreToDB(validFiles as any[],esClient as any);
+  const query = await queryBuilder(prompt, repo, organisation, username);
+  let files = [];
+  let validFiles = [];
+  await octokit.paginate(octokit.rest.search.code, {
+    q: query,
+    per_page: 100
+  },
+  (response : any) => {
+    processCount++;
+    files = files.concat(response.data)
+    if(files.length >= 900){
+      console.log("Validating and storing files since rate limit reached")
+      ValidateandStoreFiles(files, esClient).then((validatedFiles) => {
+        validFiles = validFiles.concat(validatedFiles);
+      });
+      files = []
+    }
+  }
+  );
+  //this ending before the above one
+  ValidateandStoreFiles(files, esClient).then((validatedFiles) => {
+    validFiles = validFiles.concat(validatedFiles);
+  });
+  while(processCount != finishedCount){
+    await new Promise(r => setTimeout(r, 1000));
+    console.log("Waiting for all files to be processed")
+  }
   return validFiles;
 }
 

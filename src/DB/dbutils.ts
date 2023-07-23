@@ -11,6 +11,9 @@ export async function checkClusterHealth(esClient: any) : Promise<string>  {
 
 export async function BulkStoreToDB(validFiles: any,esClient: any) : Promise<void>{
     try {
+        if(validFiles.length == 0){
+          return;
+        }
         const response = await esClient.bulk({ body: validFiles });
         // console.log('Bulk response:', response);
         return response;
