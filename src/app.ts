@@ -5,13 +5,32 @@ import dotenv from 'dotenv';
 import es from 'elasticsearch';
 import { checkClusterHealth } from './DB/dbutils.js';
 // import { router as userRoutes } from "./routes/user.routes.js";
+import { throttling } from '@octokit/plugin-throttling'
+import { retry } from '@octokit/plugin-retry'
 
+const CustomOctokit = Octokit.plugin(throttling as any, retry as any);
 dotenv.config();
 
 const app = express();
-const octokit = new Octokit({
+
+const octokit = new CustomOctokit({
   userAgent: 'github-openapi-search/v0.0.1',
   auth: process.env.GITHUB_API_KEY,
+  throttle: {
+    onRateLimit: (retryAfter, options) => {
+      octokit.log.warn(
+        `Request quota exhausted for request ${options.method} ${options.url}`,
+      );
+      console.log(`Retrying after ${retryAfter} seconds!`);
+      return true;
+    },
+    onSecondaryRateLimit: (retryAfter, options, octokit) => {
+      // does not retry, only logs a warning
+      octokit.log.warn(
+        `Secondary quota detected for request ${options.method} ${options.url}`,
+      );
+    },
+  },
 });
 
 const esClient = new es.Client({

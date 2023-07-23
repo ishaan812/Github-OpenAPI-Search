@@ -1,8 +1,10 @@
 import { octokit } from '../app.js';
 // import { CodeSearchResponse } from "./searchstructs.js";
 import crypto from "crypto";
+import OASNormalize from 'oas-normalize';
 
-export function generateUUID() {
+
+export function generateUUID() : string {
   // Generate a random buffer of 16 bytes
   const buffer = crypto.randomBytes(16);
 
@@ -29,18 +31,14 @@ export async function getFileContents(
       path: filepath,
     },
   );
+  console.log(response)
   return response.data['content'];
 }
 
-export async function handleCodeSearch(
-  prompt: string,
-  repo: string,
-  organisation: string,
-  username: string,
-  page: number,
-): Promise<any> {
-  //Why does /(openai|swagger)/ not work :/
-  //Even Parenthesis doesn't work
+export async function queryBuilder(prompt: string, repo: string, organisation: string, username: string, page: number): Promise<string> {
+  if(prompt == undefined){
+    prompt = "" 
+  }
   let query = prompt + ' AND "openapi: 3"';
     // query+= prompt + ' AND "swagger: \\"2"'
   if (repo != undefined) {
@@ -50,12 +48,47 @@ export async function handleCodeSearch(
   } else if (username != undefined) {
     query += '+user:' + username;
   }
-  console.log('Query: ' + query);
-  //api call handling
+  return query;
+}
+
+
+export async function handleCodeSearch(
+  prompt: string,
+  repo: string,
+  organisation: string,
+  username: string,
+  page: number,
+): Promise<any> {
+  const query = await queryBuilder(prompt, repo, organisation, username, page);
   const results = await octokit.paginate(octokit.rest.search.code, {
     q: query,
     per_page: 100,
   });
-  console.log(results.length)
   return results;
+}
+
+export async function validateFiles(files: any[]): Promise<any> {
+  const validFiles = [];
+  for (const file of files) {
+    const base64content = await getFileContents(
+      file.repository.owner.login,
+      file.repository.name,
+      file.path,
+    );
+    const content = Buffer.from(base64content, 'base64').toString();
+    const oas = new OASNormalize.default(content);
+    oas
+      .validate()
+      .then((definition) => {
+        console.log('File ' + file.name + ' is valid');
+        console.log(definition?.info?.title)
+        validFiles.push({index: { _index: 'openapi', _id: generateUUID()}});
+        validFiles.push({title: definition?.info?.title, description: definition?.info?.description, version: definition?.info?.version, servers: JSON.stringify(definition?.servers), paths: JSON.stringify(definition?.paths) , path: file.path, repository: file?.repository?.name, owner: file?.repository?.owner?.login, data: content});
+      })
+      .catch((error) => {
+        console.log('File ' + file.name + ' is not valid');
+      });
+   }
+  
+  return validFiles;
 }

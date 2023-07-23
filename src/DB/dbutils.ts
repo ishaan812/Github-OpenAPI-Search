@@ -9,16 +9,11 @@ export async function checkClusterHealth(esClient: any) : Promise<string>  {
     }
   }
 
-async function * generator (validFiles: any) {
-  for (const file of validFiles) {
-    yield file
-  }
-}
-
 export async function BulkStoreToDB(validFiles: any,esClient: any) : Promise<void>{
     try {
-        const response = await esClient.bulk({ body: validFiles});
-        console.log('Bulk response:', response);
+        const response = await esClient.bulk({ body: validFiles });
+        // console.log('Bulk response:', response);
+        return response;
       } catch (error) {
         console.error('Error bulk indexing:', error);
       }
