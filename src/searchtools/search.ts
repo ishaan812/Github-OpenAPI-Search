@@ -1,8 +1,9 @@
-import { queryBuilder, ValidateandStoreFiles, finishedCount} from './searchutils.js';
+import { queryBuilder, ValidateandStoreFiles} from './searchutils.js';
 import { octokit } from '../app.js';
 
 
-let processCount = 0;
+let processCount = 1;
+let finishedCount = 1;
 
 export async function activeSearch(
   prompt: string,
@@ -19,12 +20,13 @@ export async function activeSearch(
     per_page: 100
   },
   (response : any) => {
-    processCount++;
     files = files.concat(response.data)
-    if(files.length >= 900){
+    if(files.length >= 500){
       console.log("Validating and storing files since rate limit reached")
+      processCount++;
       ValidateandStoreFiles(files, esClient).then((validatedFiles) => {
         validFiles = validFiles.concat(validatedFiles);
+        finishedCount++;
       });
       files = []
     }
@@ -34,8 +36,9 @@ export async function activeSearch(
   ValidateandStoreFiles(files, esClient).then((validatedFiles) => {
     validFiles = validFiles.concat(validatedFiles);
   });
-  while(processCount != finishedCount){
-    await new Promise(r => setTimeout(r, 1000));
+  while(processCount > finishedCount){
+    await new Promise(r => setTimeout(r, 3000));
+    console.log("Total Processes: "+processCount+"\nFinished Processes: "+finishedCount)
     console.log("Waiting for all files to be processed")
   }
   return validFiles;

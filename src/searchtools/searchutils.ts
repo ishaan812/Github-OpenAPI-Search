@@ -4,7 +4,7 @@ import crypto from "crypto";
 import OASNormalize from 'oas-normalize';
 import { BulkStoreToDB } from '../DB/dbutils.js';
 
-export let finishedCount = 0;
+
 
 
 export function generateUUID() : string {
@@ -34,7 +34,6 @@ export async function getFileContents(
       path: filepath,
     },
   );
-  console.log(response)
   return response.data['content'];
 }
 
@@ -88,6 +87,5 @@ export async function ValidateandStoreFiles(files: any[], esClient: any): Promis
       });
    }
   BulkStoreToDB(validFiles as any[],esClient as any);
-  finishedCount++;
   return validFiles;
 }
