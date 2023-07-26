@@ -4,10 +4,9 @@ import { activeSearch, passiveSearch } from './searchtools/search.js';
 import dotenv from 'dotenv';
 import es from 'elasticsearch';
 import { checkClusterHealth } from './DB/dbutils.js';
-import { throttling } from '@octokit/plugin-throttling'
-import { retry } from '@octokit/plugin-retry'
-
-
+import { throttling } from '@octokit/plugin-throttling';
+import { retry } from '@octokit/plugin-retry';
+import { UpdateOpenAPIFiles } from './updatetools/update.js';
 
 const CustomOctokit = Octokit.plugin(throttling as any, retry as any);
 dotenv.config();
@@ -34,8 +33,6 @@ const octokit = new CustomOctokit({
 
 const app = express();
 
-
-
 const esClient = new es.Client({
   host: 'http://localhost:9200',
   log: 'trace',
@@ -51,7 +48,7 @@ app.use('/passive', async (_req, _res) => {
   const query = _req.query.q as string;
   const results = await passiveSearch(query, esClient);
   _res.send(results);
-})
+});
 
 app.use('/search', async (_req, _res) => {
   const Repository = _req.query.repo as string;
@@ -70,10 +67,15 @@ app.use('/search', async (_req, _res) => {
   _res.send(results);
 });
 
+app.use('/update', async (_req, _res) => {
+  const results = await UpdateOpenAPIFiles(esClient);
+  _res.send(results);
+});
+
 app.use('/ping', async (_req, _res) => {
   const response = await checkClusterHealth(esClient);
   _res.send(response);
-})
+});
 
 app.get('/', (_req, _res) => {
   _res.send('TypeScript With Express');

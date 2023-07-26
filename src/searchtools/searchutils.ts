@@ -1,13 +1,10 @@
 import { octokit } from '../app.js';
 // import { CodeSearchResponse } from "./searchstructs.js";
-import crypto from "crypto";
+import crypto from 'crypto';
 import OASNormalize from 'oas-normalize';
 import { BulkStoreToDB } from '../DB/dbutils.js';
 
-
-
-
-export function generateUUID() : string {
+export function generateUUID(): string {
   // Generate a random buffer of 16 bytes
   const buffer = crypto.randomBytes(16);
 
@@ -34,20 +31,27 @@ export async function getFileContents(
       path: filepath,
     },
   );
-  return response.data['content'];
+  console.log(response['data']['sha'])
+  return response;
 }
 
-export async function queryBuilder(prompt: string, repo: string, organisation: string, username: string, rootquery: string): Promise<string> {
-  if(prompt == undefined){
-    prompt = "" 
+export async function queryBuilder(
+  prompt: string,
+  repo: string,
+  organisation: string,
+  username: string,
+  rootquery: string,
+): Promise<string> {
+  if (prompt == undefined) {
+    prompt = '';
   }
-  let query
-  if(rootquery != undefined){
-    query = rootquery
-    return query
+  let query;
+  if (rootquery != undefined) {
+    query = rootquery;
+    return query;
   }
   query = prompt + ' AND "openapi: 3"';
-    // query+= prompt + ' AND "swagger: \\"2"'
+  // query+= prompt + ' AND "swagger: \\"2"'
   if (repo != undefined) {
     query += '+repo:' + repo;
   } else if (organisation != undefined) {
@@ -60,37 +64,55 @@ export async function queryBuilder(prompt: string, repo: string, organisation: s
   return query;
 }
 
-export async function ValidateandStoreFiles(files: any[], esClient: any): Promise<any> {
-  if(files.length == 0){
+export async function ValidateandStoreFiles(
+  files: any[],
+  esClient: any,
+): Promise<any> {
+  if (files.length == 0) {
     return;
   }
-  console.log("Validating and storing files")
+  console.log('Validating and storing files');
   let validFiles = [];
   for (const file of files) {
-    const base64content = await getFileContents(
+    const response = await getFileContents(
       file.repository.owner.login,
       file.repository.name,
       file.path,
     );
-    const content = Buffer.from(base64content, 'base64').toString();
+    const content = Buffer.from(response['data']['content'], 'base64').toString();
     const oas = new OASNormalize.default(content);
     oas
       .validate()
       .then((definition) => {
         console.log('File ' + file.name + ' is valid');
-        console.log(definition?.info?.title)
-        validFiles.push({index: { _index: 'openapi', _id: generateUUID()}});
-        validFiles.push({title: definition?.info?.title, description: definition?.info?.description, version: definition?.info?.version, servers: JSON.stringify(definition?.servers), paths: JSON.stringify(definition?.paths) , path: file.path, repository: file?.repository?.name, owner: file?.repository?.owner?.login, data: content});
-        if(validFiles.length >= 50){
-          console.log("Storing some of the valid files")
-          BulkStoreToDB(validFiles as any[],esClient as any);
-          validFiles = []
+        console.log(definition?.info?.title);
+        console.log(validFiles.length);
+        validFiles.push({ index: { _index: 'openapi', _id: response['data']['sha'] } });
+        validFiles.push({
+          URL: response['url'],
+          ETAG: response['headers']['etag'],
+          title: definition?.info?.title,
+          description: definition?.info?.description,
+          version: definition?.info?.version,
+          servers: JSON.stringify(definition?.servers),
+          paths: JSON.stringify(definition?.paths),
+          filepath: file.path,
+          repository: file?.repository?.name,
+          owner: file?.repository?.owner?.login,
+          data: content,
+          LastModified: response['headers']['last-modified'],
+          LastUpdated: new Date().toISOString(),
+        });
+        if (validFiles.length >= 50) {
+          console.log('Storing some of the valid files');
+          BulkStoreToDB(validFiles as any[], esClient as any);
+          validFiles = [];
         }
       })
       .catch((error) => {
         console.log('File ' + file.name + ' is not valid');
       });
-   }
-  BulkStoreToDB(validFiles as any[],esClient as any);
+  }
+  BulkStoreToDB(validFiles as any[], esClient as any);
   return validFiles;
 }

@@ -1,9 +1,8 @@
-import { queryBuilder, ValidateandStoreFiles} from './searchutils.js';
+import { queryBuilder, ValidateandStoreFiles } from './searchutils.js';
 import { octokit } from '../app.js';
 
-
-let processCount = 1;
-let finishedCount = 1;
+let processCount = 0;
+let finishedCount = 0;
 
 export async function activeSearch(
   prompt: string,
@@ -13,40 +12,63 @@ export async function activeSearch(
   rootquery: string,
   esClient: any,
 ): Promise<any> {
-  const query = await queryBuilder(prompt, repo, organisation, username, rootquery);
+  const query = await queryBuilder(
+    prompt,
+    repo,
+    organisation,
+    username,
+    rootquery,
+  );
   let files = [];
   let validFiles = [];
-  console.log("Query: "+query)
-  await octokit.paginate(octokit.rest.search.code, {
-    q: query,
-    per_page: 100
-  },
-  (response : any) => {
-    files = files.concat(response.data)
-    if(files.length >= 200){
-      processCount++;
-      console.log("ValidateandStoreFiles Process Number "+processCount+" Started")
-      ValidateandStoreFiles(files, esClient).then((validatedFiles) => {
-        validFiles = validFiles.concat(validatedFiles);
-        finishedCount++;
-        console.log("ValidateandStoreFiles Process Number "+finishedCount+" Started")
-      });
-      files = []
-    }
-  }
+  console.log('Query: ' + query);
+  await octokit.paginate(
+    octokit.rest.search.code,
+    {
+      q: query,
+      per_page: 100,
+    },
+    (response: any) => {
+      files = files.concat(response.data);
+      if (files.length >= 200) {
+        processCount++;
+        console.log(
+          'ValidateandStoreFiles Process Number ' + processCount + ' Started',
+        );
+        ValidateandStoreFiles(files, esClient).then((validatedFiles) => {
+          validFiles = validFiles.concat(validatedFiles);
+          finishedCount++;
+          console.log(
+            'ValidateandStoreFiles Process Number ' +
+              finishedCount +
+              ' Finished',
+          );
+        });
+        files = [];
+      }
+    },
   );
   //this ending before the above one
   processCount++;
-  console.log("ValidateandStoreFiles Process Number "+processCount+" Started")
+  console.log(
+    'ValidateandStoreFiles Process Number ' + processCount + ' Started',
+  );
   ValidateandStoreFiles(files, esClient).then((validatedFiles) => {
     validFiles = validFiles.concat(validatedFiles);
-    console.log("ValidateandStoreFiles Process Number "+finishedCount+" Started")
+    console.log(
+      'ValidateandStoreFiles Process Number ' + finishedCount + ' Finished',
+    );
     finishedCount++;
   });
-  while(processCount > finishedCount){
-    await new Promise(r => setTimeout(r, 3000));
-    console.log("Total Processes: "+processCount+"\nFinished Processes: "+finishedCount)
-    console.log("Waiting for all files to be processed")
+  while (processCount > finishedCount) {
+    await new Promise((r) => setTimeout(r, 3000));
+    console.log(
+      'Total Processes: ' +
+        processCount +
+        '\nFinished Processes: ' +
+        finishedCount,
+    );
+    console.log('Waiting for all files to be processed');
   }
   return validFiles;
 }
@@ -65,11 +87,11 @@ export async function passiveSearch(
         query: {
           simple_query_string: {
             query: query,
-            fields: ["servers^2","paths^1.5","data^1"],
-            default_operator: "and"
-          }
-        }
-      }
+            fields: ['title^3','servers^2', 'paths^1.5', 'data^1'],
+            default_operator: 'and',
+          },
+        },
+      },
     });
 
     if (result.hits.hits) {
@@ -82,16 +104,12 @@ export async function passiveSearch(
   } catch (error) {
     if (error.message.includes('No Living connections')) {
       console.log('Elasticsearch connection error:', error);
-      return error
+      return error;
     } else {
       console.log('Error occurred during passive search:', error);
-      return error; 
+      return error;
     }
   }
 
   return 'Database not found';
 }
-
-
-
-
