@@ -4,6 +4,7 @@ import { octokit } from '../app.js';
 let processCount = 0;
 let finishedCount = 0;
 
+
 export async function activeSearch(
   prompt: string,
   repo: string,
@@ -21,7 +22,7 @@ export async function activeSearch(
   );
   let files = [];
   let validFiles = [];
-  console.log('Query: ' + query);
+  console.info('Query: ' + query);
   await octokit.paginate(
     octokit.rest.search.code,
     {
@@ -32,13 +33,13 @@ export async function activeSearch(
       files = files.concat(response.data);
       if (files.length >= 200) {
         processCount++;
-        console.log(
+        console.info(
           'ValidateandStoreFiles Process Number ' + processCount + ' Started',
         );
         ValidateandStoreFiles(files, esClient).then((validatedFiles) => {
           validFiles = validFiles.concat(validatedFiles);
           finishedCount++;
-          console.log(
+          console.info(
             'ValidateandStoreFiles Process Number ' +
               finishedCount +
               ' Finished',
@@ -50,25 +51,25 @@ export async function activeSearch(
   );
   //this ending before the above one
   processCount++;
-  console.log(
+  console.info(
     'ValidateandStoreFiles Process Number ' + processCount + ' Started',
   );
   ValidateandStoreFiles(files, esClient).then((validatedFiles) => {
     validFiles = validFiles.concat(validatedFiles);
-    console.log(
+    console.info(
       'ValidateandStoreFiles Process Number ' + finishedCount + ' Finished',
     );
     finishedCount++;
   });
   while (processCount > finishedCount) {
-    await new Promise((r) => setTimeout(r, 3000));
-    console.log(
+    await new Promise((r) => setTimeout(r, 5000));
+    console.info(
       'Total Processes: ' +
         processCount +
         '\nFinished Processes: ' +
         finishedCount,
     );
-    console.log('Waiting for all files to be processed');
+    console.info('Waiting for all files to be processed');
   }
   return validFiles;
 }
@@ -96,17 +97,17 @@ export async function passiveSearch(
 
     if (result.hits.hits) {
       if (result.hits.hits.length === 0) {
-        console.log('No results found in the database');
+        console.error('No results found in the database');
         // activeSearch(query, "", "", "", esClient);
       }
       return result.hits.hits;
     }
   } catch (error) {
     if (error.message.includes('No Living connections')) {
-      console.log('Elasticsearch connection error:', error);
+      console.error('Elasticsearch connection error:', error);
       return error;
     } else {
-      console.log('Error occurred during passive search:', error);
+      console.error('Error occurred during passive search:', error);
       return error;
     }
   }

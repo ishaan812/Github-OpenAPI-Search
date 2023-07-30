@@ -19,7 +19,7 @@ const octokit = new CustomOctokit({
       octokit.log.warn(
         `Request quota exhausted for request ${options.method} ${options.url}`,
       );
-      console.log(`Retrying after ${retryAfter} seconds!`);
+      console.info(`Retrying after ${retryAfter} seconds!`);
       return true;
     },
     onSecondaryRateLimit: (retryAfter, options, octokit) => {
@@ -67,6 +67,7 @@ app.use('/search', async (_req, _res) => {
   _res.send(results);
 });
 
+//TODO: POST /job Use verbs for REST API. 
 app.use('/update', async (_req, _res) => {
   const results = await UpdateOpenAPIFiles(esClient);
   _res.send(results);

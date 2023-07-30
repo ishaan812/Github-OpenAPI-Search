@@ -1,7 +1,7 @@
 export async function checkClusterHealth(esClient: any): Promise<string> {
   try {
     const response = await esClient.cat.health();
-    console.log('Cluster health:', response);
+    console.info('Cluster health:', response);
     return response;
   } catch (error) {
     console.error('Error checking cluster health:', error);

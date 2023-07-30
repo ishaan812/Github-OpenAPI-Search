@@ -12,7 +12,7 @@ export async function getAllDocuments(
         },
       },
     });
-    console.log(`Total ${response.hits.total.value} documents`);
+    console.info(`Total ${response.hits.total.value} documents`);
     let allDocuments = [];
     if (response) {
       allDocuments = response.hits.hits.map((hit: any) => hit._source);

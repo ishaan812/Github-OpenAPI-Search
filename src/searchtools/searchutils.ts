@@ -31,7 +31,7 @@ export async function getFileContents(
       path: filepath,
     },
   );
-  console.log(response['data']['sha'])
+  console.info(response['data']['sha'])
   return response;
 }
 
@@ -71,7 +71,7 @@ export async function ValidateandStoreFiles(
   if (files.length == 0) {
     return;
   }
-  console.log('Validating and storing files');
+  console.info('Validating and storing files');
   let validFiles = [];
   for (const file of files) {
     const response = await getFileContents(
@@ -84,9 +84,9 @@ export async function ValidateandStoreFiles(
     oas
       .validate()
       .then((definition) => {
-        console.log('File ' + file.name + ' is valid');
-        console.log(definition?.info?.title);
-        console.log(validFiles.length);
+        console.info('File ' + file.name + ' is valid');
+        console.info(definition?.info?.title);
+        console.info(validFiles.length);
         validFiles.push({ index: { _index: 'openapi', _id: response['data']['sha'] } });
         validFiles.push({
           URL: response['url'],
@@ -104,13 +104,13 @@ export async function ValidateandStoreFiles(
           LastUpdated: new Date().toISOString(),
         });
         if (validFiles.length >= 50) {
-          console.log('Storing some of the valid files');
+          console.info('Storing some of the valid files');
           BulkStoreToDB(validFiles as any[], esClient as any);
           validFiles = [];
         }
       })
       .catch((error) => {
-        console.log('File ' + file.name + ' is not valid');
+        console.info('File ' + file.name + ' is not valid');
       });
   }
   BulkStoreToDB(validFiles as any[], esClient as any);
