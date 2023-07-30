@@ -89,7 +89,7 @@ export async function ValidateandStoreFiles(
         console.info(validFiles.length);
         validFiles.push({ index: { _index: 'openapi', _id: response['data']['sha'] } });
         validFiles.push({
-          URL: response['url'],
+          URL: response['url'].split("api.github.com/repos/")[1],
           ETAG: response['headers']['etag'],
           title: definition?.info?.title,
           description: definition?.info?.description,
