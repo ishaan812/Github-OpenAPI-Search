@@ -4,7 +4,6 @@ import { octokit } from '../app.js';
 let processCount = 0;
 let finishedCount = 0;
 
-
 export async function activeSearch(
   prompt: string,
   repo: string,
@@ -88,7 +87,7 @@ export async function passiveSearch(
         query: {
           simple_query_string: {
             query: query,
-            fields: ['title^3','servers^2', 'paths^1.5', 'data^1'],
+            fields: ['title^3', 'servers^2', 'paths^1.5', 'data^1'],
             default_operator: 'and',
           },
         },

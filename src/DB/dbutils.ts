@@ -23,3 +23,52 @@ export async function BulkStoreToDB(
     console.error('Error bulk indexing:', error);
   }
 }
+
+export async function DeleteDocumentWithId(Id : string, esClient: any): Promise<void> {
+  try {
+    const index = 'openapi';
+    const updatedDocument = {
+      isDeleted: false,
+    };
+    await esClient.update({
+      index,
+      id: Id,
+      body: {
+        doc: updatedDocument,
+      },
+    });
+    console.log(`Document with ID ${Id} soft deleted.`);
+  } catch (error) {
+    console.error('Error updating the document:', error);
+  }
+}
+
+export async function CreateDocument(Id:string, document: any, esClient: any): Promise<void> {
+  try {
+    const index = 'openapi';
+    await esClient.index({
+      index,
+      id: Id,
+      body: {
+        doc: document,
+      },
+    });
+    console.log(`New Document Added with ID ${Id}`);
+  } catch (error) {
+    console.error('Error updating the document:', error);
+  }
+}
+
+export async function GetDocumentWithId(Id:string, esClient: any): Promise<any> {
+  try {
+    const index = 'openapi';
+    const document = await esClient.get({
+      index,
+      id: Id,
+    });
+    return document;
+  } catch (error) {
+    console.error('Error updating the document:', error);
+  }
+}
+

@@ -1,9 +1,8 @@
-import { getAllDocuments, UpdateDocuments } from './updateutils.js';
+import { octokit } from '../app.js';
+import { UpdateAllDocuments } from './updateutils.js';
 
-export async function UpdateOpenAPIFiles(esClient: any): Promise<any[]> {
+export async function UpdateOpenAPIFiles(esClient: any, octokit: any): Promise<string> {
   //Go through all rows in the database
-  const rows = await getAllDocuments('openapi', esClient);
-  //For each row, check for the file in the repository and update the database using the "If-None-Match" header
-  UpdateDocuments(rows, esClient);
-  return rows;
+  await UpdateAllDocuments('openapi', esClient, octokit);
+  return 'Updated OpenAPI Files';
 }

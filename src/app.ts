@@ -3,7 +3,7 @@ import { Octokit } from 'octokit';
 import { activeSearch, passiveSearch } from './searchtools/search.js';
 import dotenv from 'dotenv';
 import es from 'elasticsearch';
-import { checkClusterHealth } from './DB/dbutils.js';
+import { checkClusterHealth, GetDocumentWithId} from './DB/dbutils.js';
 import { throttling } from '@octokit/plugin-throttling';
 import { retry } from '@octokit/plugin-retry';
 import { UpdateOpenAPIFiles } from './updatetools/update.js';
@@ -35,7 +35,7 @@ const app = express();
 
 const esClient = new es.Client({
   host: 'http://localhost:9200',
-  log: 'trace',
+  // log: 'trace',
 });
 
 // Should not even be an API endpoint for passive search
@@ -43,14 +43,13 @@ const esClient = new es.Client({
 // Check for openapi.json in the contents of the repository
 // If it exists, then store in database with important content
 
-//TODO: change passive search to /search endpoint and activesearch to /active or /store endpoint
-app.use('/passive', async (_req, _res) => {
+app.get('/search', async (_req, _res) => {
   const query = _req.query.q as string;
   const results = await passiveSearch(query, esClient);
   _res.send(results);
 });
 
-app.use('/search', async (_req, _res) => {
+app.get('/database', async (_req, _res) => {
   const Repository = _req.query.repo as string;
   const Organisation = _req.query.org as string;
   const User = _req.query.user as string;
@@ -67,9 +66,8 @@ app.use('/search', async (_req, _res) => {
   _res.send(results);
 });
 
-//TODO: POST /job Use verbs for REST API. 
-app.use('/update', async (_req, _res) => {
-  const results = await UpdateOpenAPIFiles(esClient);
+app.put('/database', async (_req, _res) => {
+  const results = await UpdateOpenAPIFiles(esClient, octokit);
   _res.send(results);
 });
 
@@ -81,6 +79,8 @@ app.use('/ping', async (_req, _res) => {
 app.get('/', (_req, _res) => {
   _res.send('TypeScript With Express');
 });
+
+
 
 export default app;
 export { octokit };

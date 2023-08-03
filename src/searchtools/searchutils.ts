@@ -22,16 +22,19 @@ export async function getFileContents(
   repoowner: string,
   reponame: string,
   filepath: string,
-): Promise<string> {
-  const response = await octokit.request(
-    'GET /repos/{owner}/{repo}/contents/{path}',
-    {
-      owner: repoowner,
-      repo: reponame,
-      path: filepath,
-    },
-  );
-  console.info(response['data']['sha'])
+  etag? : string,
+): Promise<any> {
+  const requestConfig = {
+    owner: repoowner,
+    repo: reponame,
+    path: filepath,
+  }
+  if (etag != undefined) {
+    requestConfig['headers'] = {
+      'If-None-Match': etag
+    }
+  }
+  const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{filepath}', requestConfig);
   return response;
 }
 
@@ -79,7 +82,10 @@ export async function ValidateandStoreFiles(
       file.repository.name,
       file.path,
     );
-    const content = Buffer.from(response['data']['content'], 'base64').toString();
+    const content = Buffer.from(
+      response['data']['content'],
+      'base64',
+    ).toString();
     const oas = new OASNormalize.default(content);
     oas
       .validate()
@@ -87,9 +93,11 @@ export async function ValidateandStoreFiles(
         console.info('File ' + file.name + ' is valid');
         console.info(definition?.info?.title);
         console.info(validFiles.length);
-        validFiles.push({ index: { _index: 'openapi', _id: response['data']['sha'] } });
         validFiles.push({
-          URL: response['url'].split("api.github.com/repos/")[1],
+          index: { _index: 'openapi', _id: response['data']['sha'] },
+        });
+        validFiles.push({
+          URL: response['url'].split('api.github.com/repos/')[1],
           ETAG: response['headers']['etag'],
           title: definition?.info?.title,
           description: definition?.info?.description,
@@ -102,6 +110,7 @@ export async function ValidateandStoreFiles(
           data: content,
           LastModified: response['headers']['last-modified'],
           LastUpdated: new Date().toISOString(),
+          isDeleted: false,
         });
         if (validFiles.length >= 50) {
           console.info('Storing some of the valid files');
