@@ -1,5 +1,5 @@
 import { queryBuilder, ValidateandStoreFiles } from './searchutils.js';
-import { octokit } from '../app.js';
+import { octokit, esClient } from '../app.js';
 
 let processCount = 0;
 let finishedCount = 0;
@@ -10,7 +10,6 @@ export async function activeSearch(
   organisation: string,
   username: string,
   rootquery: string,
-  esClient: any,
 ): Promise<any> {
   const query = await queryBuilder(
     prompt,
@@ -35,7 +34,7 @@ export async function activeSearch(
         console.info(
           'ValidateandStoreFiles Process Number ' + processCount + ' Started',
         );
-        ValidateandStoreFiles(files, esClient).then((validatedFiles) => {
+        ValidateandStoreFiles(files).then((validatedFiles) => {
           validFiles = validFiles.concat(validatedFiles);
           finishedCount++;
           console.info(
@@ -53,7 +52,7 @@ export async function activeSearch(
   console.info(
     'ValidateandStoreFiles Process Number ' + processCount + ' Started',
   );
-  ValidateandStoreFiles(files, esClient).then((validatedFiles) => {
+  ValidateandStoreFiles(files).then((validatedFiles) => {
     validFiles = validFiles.concat(validatedFiles);
     console.info(
       'ValidateandStoreFiles Process Number ' + finishedCount + ' Finished',
@@ -75,7 +74,6 @@ export async function activeSearch(
 
 export async function passiveSearch(
   query: string,
-  esClient: any,
 ): Promise<any> {
   try {
     if (esClient === undefined) {
@@ -93,7 +91,6 @@ export async function passiveSearch(
         },
       },
     });
-
     if (result.hits.hits) {
       if (result.hits.hits.length === 0) {
         console.error('No results found in the database');

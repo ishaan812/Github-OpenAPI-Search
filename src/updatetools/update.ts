@@ -1,8 +1,7 @@
-import { octokit } from '../app.js';
 import { UpdateAllDocuments } from './updateutils.js';
 
-export async function UpdateOpenAPIFiles(esClient: any, octokit: any): Promise<string> {
+export async function UpdateOpenAPIFiles(): Promise<string> {
   //Go through all rows in the database
-  await UpdateAllDocuments('openapi', esClient, octokit);
+  await UpdateAllDocuments('openapi');
   return 'Updated OpenAPI Files';
 }

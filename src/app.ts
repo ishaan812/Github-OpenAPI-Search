@@ -3,7 +3,7 @@ import { Octokit } from 'octokit';
 import { activeSearch, passiveSearch } from './searchtools/search.js';
 import dotenv from 'dotenv';
 import es from 'elasticsearch';
-import { checkClusterHealth, GetDocumentWithId} from './DB/dbutils.js';
+import { checkClusterHealth} from './DB/dbutils.js';
 import { throttling } from '@octokit/plugin-throttling';
 import { retry } from '@octokit/plugin-retry';
 import { UpdateOpenAPIFiles } from './updatetools/update.js';
@@ -33,23 +33,19 @@ const octokit = new CustomOctokit({
 
 const app = express();
 
-const esClient = new es.Client({
+export const esClient = new es.Client({
   host: 'http://localhost:9200',
   // log: 'trace',
 });
 
-// Should not even be an API endpoint for passive search
-// Should just fetch repositories and go through them (with ETAG to make sure no repeats)
-// Check for openapi.json in the contents of the repository
-// If it exists, then store in database with important content
-
+//TODO: Iterate on api endpoints
 app.get('/search', async (_req, _res) => {
   const query = _req.query.q as string;
-  const results = await passiveSearch(query, esClient);
+  const results = await passiveSearch(query);
   _res.send(results);
 });
 
-app.get('/database', async (_req, _res) => {
+app.post('/database', async (_req, _res) => {
   const Repository = _req.query.repo as string;
   const Organisation = _req.query.org as string;
   const User = _req.query.user as string;
@@ -61,18 +57,17 @@ app.get('/database', async (_req, _res) => {
     Organisation as string,
     User as string,
     RootQuery as string,
-    esClient as any,
   );
   _res.send(results);
 });
 
 app.put('/database', async (_req, _res) => {
-  const results = await UpdateOpenAPIFiles(esClient, octokit);
+  const results = await UpdateOpenAPIFiles();
   _res.send(results);
 });
 
 app.use('/ping', async (_req, _res) => {
-  const response = await checkClusterHealth(esClient);
+  const response = await checkClusterHealth();
   _res.send(response);
 });
 

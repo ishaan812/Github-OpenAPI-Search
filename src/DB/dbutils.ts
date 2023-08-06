@@ -1,4 +1,6 @@
-export async function checkClusterHealth(esClient: any): Promise<string> {
+import { esClient } from "../app.js";
+
+export async function checkClusterHealth(): Promise<string> {
   try {
     const response = await esClient.cat.health();
     console.info('Cluster health:', response);
@@ -11,7 +13,6 @@ export async function checkClusterHealth(esClient: any): Promise<string> {
 
 export async function BulkStoreToDB(
   validFiles: any,
-  esClient: any,
 ): Promise<void> {
   try {
     if (validFiles.length == 0) {
@@ -24,11 +25,11 @@ export async function BulkStoreToDB(
   }
 }
 
-export async function DeleteDocumentWithId(Id : string, esClient: any): Promise<void> {
+export async function DeleteDocumentWithId(Id : string): Promise<void> {
   try {
     const index = 'openapi';
     const updatedDocument = {
-      isDeleted: false,
+      isDeleted: true,
     };
     await esClient.update({
       index,
@@ -37,13 +38,13 @@ export async function DeleteDocumentWithId(Id : string, esClient: any): Promise<
         doc: updatedDocument,
       },
     });
-    console.log(`Document with ID ${Id} soft deleted.`);
+    console.info(`Document with ID ${Id} soft deleted.`);
   } catch (error) {
-    console.error('Error updating the document:', error);
+    console.error('Error deleting document from the database:', error);
   }
 }
 
-export async function CreateDocument(Id:string, document: any, esClient: any): Promise<void> {
+export async function CreateDocument(Id:string, document: any): Promise<void> {
   try {
     const index = 'openapi';
     await esClient.index({
@@ -53,13 +54,14 @@ export async function CreateDocument(Id:string, document: any, esClient: any): P
         doc: document,
       },
     });
-    console.log(`New Document Added with ID ${Id}`);
+    console.info(`New Document Added with ID ${Id}`);
   } catch (error) {
-    console.error('Error updating the document:', error);
+    // console.error(document)
+    console.error('Error creating the document:', error);
   }
 }
 
-export async function GetDocumentWithId(Id:string, esClient: any): Promise<any> {
+export async function GetDocumentWithId(Id:string): Promise<any> {
   try {
     const index = 'openapi';
     const document = await esClient.get({
@@ -68,7 +70,7 @@ export async function GetDocumentWithId(Id:string, esClient: any): Promise<any> 
     });
     return document;
   } catch (error) {
-    console.error('Error updating the document:', error);
+    console.error('Error getting document from database:', error);
   }
 }
 

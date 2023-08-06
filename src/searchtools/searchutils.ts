@@ -22,19 +22,15 @@ export async function getFileContents(
   repoowner: string,
   reponame: string,
   filepath: string,
-  etag? : string,
 ): Promise<any> {
-  const requestConfig = {
-    owner: repoowner,
-    repo: reponame,
-    path: filepath,
-  }
-  if (etag != undefined) {
-    requestConfig['headers'] = {
-      'If-None-Match': etag
-    }
-  }
-  const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{filepath}', requestConfig);
+  const response = await octokit.request(
+    'GET /repos/{owner}/{repo}/contents/{path}',
+    {
+      owner: repoowner,
+      repo: reponame,
+      path: filepath,
+    },
+  );
   return response;
 }
 
@@ -69,7 +65,6 @@ export async function queryBuilder(
 
 export async function ValidateandStoreFiles(
   files: any[],
-  esClient: any,
 ): Promise<any> {
   if (files.length == 0) {
     return;
@@ -114,7 +109,7 @@ export async function ValidateandStoreFiles(
         });
         if (validFiles.length >= 50) {
           console.info('Storing some of the valid files');
-          BulkStoreToDB(validFiles as any[], esClient as any);
+          BulkStoreToDB(validFiles as any[]);
           validFiles = [];
         }
       })
@@ -122,6 +117,6 @@ export async function ValidateandStoreFiles(
         console.info('File ' + file.name + ' is not valid');
       });
   }
-  BulkStoreToDB(validFiles as any[], esClient as any);
+  BulkStoreToDB(validFiles as any[]);
   return validFiles;
 }

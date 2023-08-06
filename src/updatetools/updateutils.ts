@@ -1,8 +1,8 @@
 import OASNormalize from "oas-normalize"
-import { octokit } from "../app.js"
+import { octokit, esClient } from "../app.js"
 import { DeleteDocumentWithId, CreateDocument } from "../DB/dbutils.js"
 
-async function * scrollSearch (params, esClient: any)  {
+async function * scrollSearch (params)  {
   let response = await esClient.search(params)
   while (true) {
     const sourceHits = response.hits.hits
@@ -22,36 +22,10 @@ async function * scrollSearch (params, esClient: any)  {
   }
 }
 
-export async function UpdateAllDocuments(
-  index: string,
-  esClient: any,
-  octokit: any,
-): Promise<string> {
-  // Perform the initial search request to initiate the scroll
-  const params = {
-    index: 'openapi',
-    scroll: '30s',
-    size: 1,
-    _source: ['owner', 'repository', 'filepath', 'ETAG', 'isDeleted'],
-    body:{
-      query: {
-        match_all: {}
-      }
-    }
-  }
-  for await (const hit of scrollSearch(params, esClient)) {
-    await UpdateDocument(hit, esClient);
-  }
-  return new Promise((resolve) => {
-    resolve('Database Updated');
-  });
-}
-
-export async function UpdateDocument(document: any, esClient: any): Promise<void> {
+async function UpdateDocument(document: any): Promise<void> {
   if(document._source.isDeleted === true){
     return
   }
-  console.log(document._source);
   const requestConfig = {
     owner: document._source.owner,
     repo: document._source.repository,
@@ -68,9 +42,9 @@ export async function UpdateDocument(document: any, esClient: any): Promise<void
     }
   };
   await octokit.request(request).then(async(response) => {
-      console.info("File to be updated")
+      console.info("File "+document._id+" to be updated")
       // make isDeleted true for current Document and update
-      DeleteDocumentWithId(document._id, esClient)
+      DeleteDocumentWithId(document._id)
       // create new Document with new content
       const content = Buffer.from(
         response['data']['content'],
@@ -98,21 +72,45 @@ export async function UpdateDocument(document: any, esClient: any): Promise<void
           LastUpdated: new Date().toISOString(),
           isDeleted: false,
         }
-        await CreateDocument(response['data']['sha'], newData, esClient)
-        console.info('Updated File Added To Database');
+        await CreateDocument(response['data']['sha'], newData)
+        console.info('Updated File '+response['data']['sha']+' Added To Database');
       })
       .catch(() => {
         console.info('Updated File is not valid');
       });
     }).catch((error) => {
     if(error.status == 304){
-      console.info("File has not changed")
+      console.info("File "+document._id+" has not changed")
       return
+    } else if (error.status == 404){
+      console.info("File "+document._id+" does not exist anymore and has been deleted")
+      DeleteDocumentWithId(document._id)
     } else {
       console.error(error)
     }
   });
 }
 
-
+export async function UpdateAllDocuments(
+  index: string,
+): Promise<string> {
+  // Perform the initial search request to initiate the scroll
+  const params = {
+    index: index,
+    scroll: '30s',
+    size: 1,
+    _source: ['owner', 'repository', 'filepath', 'ETAG', 'isDeleted'],
+    body:{
+      query: {
+        match_all: {}
+      }
+    }
+  }
+  for await (const hit of scrollSearch(params)) {
+    await UpdateDocument(hit);
+  }
+  return new Promise((resolve) => {
+    resolve('Database Updated');
+  });
+}
 
