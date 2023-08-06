@@ -56,7 +56,7 @@ export async function CreateDocument(Id:string, document: any): Promise<void> {
     });
     console.info(`New Document Added with ID ${Id}`);
   } catch (error) {
-    // console.error(document)
+    //TODO: Add error handling for 400 over here
     console.error('Error creating the document:', error);
   }
 }
