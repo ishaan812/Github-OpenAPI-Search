@@ -2,7 +2,27 @@ import OASNormalize from "oas-normalize"
 import { octokit, esClient } from "../app.js"
 import { DeleteDocumentWithId, CreateDocument } from "../DB/dbutils.js"
 
-async function * scrollSearch (params)  {
+
+async function ETAGRequestBuilder(document: any): Promise<any> {
+  const requestConfig = {
+    owner: document._source.owner,
+    repo: document._source.repository,
+    path: document._source.filepath,
+  };
+  requestConfig['headers'] = {
+    'If-None-Match': document._source.ETAG,
+  };
+  const request = {
+    method: 'GET',
+    url: "/repos/"+requestConfig.owner+"/"+requestConfig.repo+"/contents/"+requestConfig.path,
+    headers: {
+      'If-None-Match': document._source.ETAG,
+    }
+  };
+  return 
+}
+
+export async function * scrollSearch (params)  {
   let response = await esClient.search(params)
   while (true) {
     const sourceHits = response.hits.hits
@@ -22,25 +42,11 @@ async function * scrollSearch (params)  {
   }
 }
 
-async function UpdateDocument(document: any): Promise<void> {
+export async function UpdateDocument(document: any): Promise<void> {
   if(document._source.isDeleted === true){
     return
   }
-  const requestConfig = {
-    owner: document._source.owner,
-    repo: document._source.repository,
-    path: document._source.filepath,
-  };
-  requestConfig['headers'] = {
-    'If-None-Match': document._source.ETAG,
-  };
-  const request = {
-    method: 'GET',
-    url: "/repos/"+requestConfig.owner+"/"+requestConfig.repo+"/contents/"+requestConfig.path,
-    headers: {
-      'If-None-Match': document._source.ETAG,
-    }
-  };
+  const request = await ETAGRequestBuilder(document)
   await octokit.request(request).then(async(response) => {
       console.info("File "+document._id+" to be updated")
       // make isDeleted true for current Document and update
@@ -91,26 +97,5 @@ async function UpdateDocument(document: any): Promise<void> {
   });
 }
 
-export async function UpdateAllDocuments(
-  index: string,
-): Promise<string> {
-  // Perform the initial search request to initiate the scroll
-  const params = {
-    index: index,
-    scroll: '30s',
-    size: 1,
-    _source: ['owner', 'repository', 'filepath', 'ETAG', 'isDeleted'],
-    body:{
-      query: {
-        match_all: {}
-      }
-    }
-  }
-  for await (const hit of scrollSearch(params)) {
-    await UpdateDocument(hit);
-  }
-  return new Promise((resolve) => {
-    resolve('Database Updated');
-  });
-}
+
 

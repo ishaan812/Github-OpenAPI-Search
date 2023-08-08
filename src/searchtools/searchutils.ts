@@ -46,7 +46,11 @@ export async function queryBuilder(
   }
   let query;
   if (rootquery != undefined) {
-    query = rootquery;
+    if (rootquery === 'openapi') {
+      query = '"openapi:3"'
+    } else if (rootquery === 'swagger') {
+      query = '"swagger: \\"2"'
+    }
     return query;
   }
   query = prompt + ' AND "openapi: 3"';
