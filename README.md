@@ -12,7 +12,8 @@ The project will consist of developing an open-source API that allows you to pas
 - Jest
 
 ## Dev Runbook
-Dependancies: NodeJS, npm, GithubAPIKey 
+Dependancies: NodeJS 18, npm, GithubAPIKey
+How to get a Github API Key: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens  
 
  1. Pull the repository to your local setup
  2. Run `npm i`
