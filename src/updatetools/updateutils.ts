@@ -1,6 +1,7 @@
 import OASNormalize from "oas-normalize"
 import { octokit, esClient } from "../app.js"
 import { DeleteDocumentWithId, CreateDocument } from "../DB/dbutils.js"
+import { url } from "inspector";
 
 
 async function ETAGRequestBuilder(document: any): Promise<any> {
@@ -19,7 +20,7 @@ async function ETAGRequestBuilder(document: any): Promise<any> {
       'If-None-Match': document._source.ETAG,
     }
   };
-  return 
+  return request;
 }
 
 export async function * scrollSearch (params)  {

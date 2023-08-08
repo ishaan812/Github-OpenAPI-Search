@@ -15,5 +15,5 @@ export async function UpdateOpenAPIFiles(): Promise<string> {
   for await (const hit of scrollSearch(params)) {
     await UpdateDocument(hit);
   }
-  return 'Updated All OpenAPI Files';
+  return "Updated All OpenAPI Files";
 }

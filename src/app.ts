@@ -45,7 +45,8 @@ app.get('/search', async (_req, _res) => {
   _res.send(results);
 });
 
-app.post('/database', async (_req, _res) => {
+//openapi2db
+app.post('/openapi', async (_req, _res) => {
   const Repository = _req.query.repo as string;
   const Organisation = _req.query.org as string;
   const User = _req.query.user as string;
@@ -61,7 +62,7 @@ app.post('/database', async (_req, _res) => {
   _res.send(results);
 });
 
-app.put('/database', async (_req, _res) => {
+app.put('/openapi', async (_req, _res) => {
   const results = await UpdateOpenAPIFiles();
   _res.send(results);
 });
