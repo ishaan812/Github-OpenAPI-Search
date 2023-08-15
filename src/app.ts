@@ -15,15 +15,14 @@ const octokit = new CustomOctokit({
   userAgent: 'github-openapi-search/v0.0.1',
   auth: process.env.GITHUB_API_KEY,
   throttle: {
-    onRateLimit: (retryAfter, options) => {
+    onRateLimit: (retryAfter, options): boolean => {
       octokit.log.warn(
         `Request quota exhausted for request ${options.method} ${options.url}`,
       );
       console.info(`Retrying after ${retryAfter} seconds!`);
       return true;
     },
-    onSecondaryRateLimit: (retryAfter, options, octokit) => {
-      // does not retry, only logs a warning
+    onSecondaryRateLimit: (retryAfter, options, octokit): void => {
       octokit.log.warn(
         `Secondary quota detected for request ${options.method} ${options.url}`,
       );
@@ -32,9 +31,9 @@ const octokit = new CustomOctokit({
 });
 
 const app = express();
-
+// const esHost = process.env.ES_HOST || 'localhost';
 export const esClient = new es.Client({
-  host: 'http://localhost:9200',
+  host: 'http://elasticsearch:9200',
   // log: 'trace',
 });
 

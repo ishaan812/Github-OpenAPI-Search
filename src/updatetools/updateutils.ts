@@ -22,7 +22,7 @@ async function ETAGRequestBuilder(document: any): Promise<any> {
   return request;
 }
 
-export async function * scrollSearch (params)  {
+export async function * scrollSearch (params) : AsyncGenerator<any, any, any>  {
   let response = await esClient.search(params)
   while (true) {
     const sourceHits = response.hits.hits

@@ -121,7 +121,7 @@ export async function ValidateandStoreFiles(
           validFiles = [];
         }
       })
-      .catch((error) => {
+      .catch(() => {
         console.info('File ' + file.name + ' is not valid');
       });
   }

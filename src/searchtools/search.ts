@@ -86,7 +86,7 @@ export async function passiveSearch(
         query: {
           simple_query_string: {
             query: query,
-            fields: ['title^3', 'servers^2', 'paths^1.5', 'data^1'],
+            fields: ['data^1'],
             default_operator: 'and',
           },
         },
