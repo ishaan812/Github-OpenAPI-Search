@@ -45,7 +45,7 @@ app.get('/search', async (_req, _res) => {
   _res.send(results);
 });
 
-//openapi2db
+//other names: openapi2db
 app.post('/openapi', async (_req, _res) => {
   const Repository = _req.query.repo as string;
   const Organisation = _req.query.org as string;
@@ -73,7 +73,10 @@ app.use('/ping', async (_req, _res) => {
 });
 
 app.get('/', (_req, _res) => {
-  _res.send('TypeScript With Express');
+  const Query = _req.query.q as string;
+  octokit.rest.search.code({ q: '"openapi: 3"', per_page: 100}).then((response) => {
+    _res.send(response);
+  });
 });
 
 

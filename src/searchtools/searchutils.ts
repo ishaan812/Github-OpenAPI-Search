@@ -44,7 +44,8 @@ export async function queryBuilder(
   if (prompt == undefined) {
     prompt = '';
   }
-  let query;
+  let query : string;
+  let filter : string;
   if (rootquery != undefined) {
     if (rootquery === 'openapi') {
       query = 'openapi: 3'
@@ -53,16 +54,19 @@ export async function queryBuilder(
     }
     return query;
   }
-  query = prompt + ' AND "openapi: 3"';
-  // query+= prompt + ' AND "swagger: \\"2"'
   if (repo != undefined) {
-    query += '+repo:' + repo;
+    filter = '+repo:' + repo + ' ';
   } else if (organisation != undefined) {
-    query += '+org:' + organisation;
+    filter = 'org:' + organisation + ' ';
   } else if (username != undefined) {
-    query += '+user:' + username;
+    filter += '+user:' + username + ' ';
+  }
+  if(prompt) {
+    // query = filter + prompt + ' "openapi: 3"';
+    query = filter + prompt + ` "swagger: \\"2"`;
   } else {
-    return query;
+    // query = filter + ' "openapi: 3"';
+    query = filter + ' "swagger: \\"2"';
   }
   return query;
 }

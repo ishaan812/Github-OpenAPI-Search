@@ -28,6 +28,7 @@ export async function activeSearch(
       per_page: 100,
     },
     (response: any) => {
+      console.log(response)
       files = files.concat(response.data);
       if (files.length >= 200) {
         processCount++;
@@ -94,7 +95,6 @@ export async function passiveSearch(
     if (result.hits.hits) {
       if (result.hits.hits.length === 0) {
         console.error('No results found in the database');
-        // activeSearch(query, "", "", "", esClient);
       }
       return result.hits.hits;
     }
