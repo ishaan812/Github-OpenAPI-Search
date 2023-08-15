@@ -73,10 +73,7 @@ app.use('/ping', async (_req, _res) => {
 });
 
 app.get('/', (_req, _res) => {
-  const Query = _req.query.q as string;
-  octokit.rest.search.code({ q: '"openapi: 3"', per_page: 100}).then((response) => {
-    _res.send(response);
-  });
+  _res.send("Typescript with Node.js");
 });
 
 

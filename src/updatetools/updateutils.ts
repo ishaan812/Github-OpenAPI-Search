@@ -1,7 +1,6 @@
 import OASNormalize from "oas-normalize"
 import { octokit, esClient } from "../app.js"
 import { DeleteDocumentWithId, CreateDocument } from "../DB/dbutils.js"
-import { url } from "inspector";
 
 
 async function ETAGRequestBuilder(document: any): Promise<any> {
