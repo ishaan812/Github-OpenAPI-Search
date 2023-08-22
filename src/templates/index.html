@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Github OpenAPI Search</title>
+    <style>
+      /* Add some basic styling for JSON output */
+      .json-container {
+        border: 1px solid #ccc;
+        padding: 10px;
+        background-color: #f7f7f7;
+        font-family: monospace;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Github OpenAPI Search</h1>
+
+    <h2>Passive Search</h2>
+    <input type="text" id="passiveSearchInput" placeholder="Enter query" />
+    <button id="passiveSearchButton">Search</button>
+    <div class="json-container" id="passiveSearchResults"></div>
+
+    <h2>Active Search</h2>
+    <input type="text" id="activeSearchPrompt" placeholder="Enter prompt" />
+    <input type="text" id="activeSearchRepo" placeholder="Enter repository" />
+    <input type="text" id="activeSearchOrg" placeholder="Enter organization" />
+    <input type="text" id="activeSearchUser" placeholder="Enter user" />
+    <input
+      type="text"
+      id="activeSearchRootQuery"
+      placeholder="Enter root query"
+    />
+    <button id="activeSearchButton">Search</button>
+    <div id="activeSearchResults"></div>
+
+    <h2>Update OpenAPI Files</h2>
+    <button id="updateOpenAPIButton">Update</button>
+    <div id="updateOpenAPIResults"></div>
+
+    <h2>Check Cluster Health</h2>
+    <button id="checkClusterHealthButton">Check</button>
+    <div id="checkClusterHealthResults"></div>
+
+    <script>
+      const passiveSearchButton = document.getElementById(
+        'passiveSearchButton',
+      );
+      const passiveSearchInput = document.getElementById('passiveSearchInput');
+      const passiveSearchResults = document.getElementById(
+        'passiveSearchResults',
+      );
+
+      const activeSearchButton = document.getElementById('activeSearchButton');
+      const activeSearchPrompt = document.getElementById('activeSearchPrompt');
+      const activeSearchRepo = document.getElementById('activeSearchRepo');
+      // ... (get other input elements)
+      const activeSearchResults = document.getElementById(
+        'activeSearchResults',
+      );
+
+      const updateOpenAPIButton = document.getElementById(
+        'updateOpenAPIButton',
+      );
+      const updateOpenAPIResults = document.getElementById(
+        'updateOpenAPIResults',
+      );
+
+      const checkClusterHealthButton = document.getElementById(
+        'checkClusterHealthButton',
+      );
+      const checkClusterHealthResults = document.getElementById(
+        'checkClusterHealthResults',
+      );
+
+      // Function to handle passive search
+      passiveSearchButton.addEventListener('click', async () => {
+        const query = passiveSearchInput.value;
+        const response = await fetch(`/search?q=${query}`);
+        const data = await response.json();
+        passiveSearchResults.textContent = JSON.stringify(data, null, 2);
+      });
+
+      // Function to handle active search
+      activeSearchButton.addEventListener('click', async () => {
+        const prompt = activeSearchPrompt.value;
+        const repo = activeSearchRepo.value;
+        // ... (get other input values)
+        const response = await fetch(
+          `/openapi?prompt=${prompt}&repo=${repo}&org=${org}&user=${user}&rootquery=${rootquery}`,
+        );
+        const data = await response.json();
+        activeSearchResults.textContent = JSON.stringify(data, null, 2);
+      });
+
+      // Function to handle update OpenAPI files
+      updateOpenAPIButton.addEventListener('click', async () => {
+        const response = await fetch('/openapi', { method: 'PUT' });
+        const data = await response.json();
+        updateOpenAPIResults.textContent = JSON.stringify(data, null, 2);
+      });
+
+      // Function to handle check cluster health
+      checkClusterHealthButton.addEventListener('click', async () => {
+        const response = await fetch('/ping');
+        const data = await response.json();
+        checkClusterHealthResults.textContent = JSON.stringify(data, null, 2);
+      });
+    </script>
+  </body>
+</html>

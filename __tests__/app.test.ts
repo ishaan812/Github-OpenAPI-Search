@@ -1,10 +1,12 @@
-import request from 'supertest';
-import app from '../src/app.js';
+import axios from 'axios';
 
-describe('Test / endpoint', () => {
-  it('should respond with a JSON message', async () => {
-    const response = await request(app).get('/');
+describe('API Tests', () => {
+  test('GET /', async () => {
+    const response = await axios.get('http://localhost:8080/');
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({ message: 'Hello, World!' });
+  });
+  test('GET /ping', async () => {
+    const response = await axios.get('http://localhost:8080/ping');
+    expect(response.status).toBe(200);
   });
 });

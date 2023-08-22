@@ -7,8 +7,8 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - '9200:9200'
+      - '9300:9300'
     volumes:
       - esdata:/usr/share/elasticsearch/data
 
@@ -21,12 +21,11 @@ services:
       - GITHUB_API_KEY=${GITHUB_API_KEY}
       - ES_HOST=host.docker.internal
     ports:
-      - "${PORT}:${PORT}"
+      - '${PORT}:${PORT}'
     depends_on:
       - elasticsearch
     links:
       - elasticsearch
-    
 
 volumes:
   esdata:

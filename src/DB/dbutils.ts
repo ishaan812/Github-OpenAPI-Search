@@ -1,4 +1,4 @@
-import { esClient } from "../app.js";
+import { esClient } from '../app.js';
 
 export async function checkClusterHealth(): Promise<string> {
   try {
@@ -6,14 +6,12 @@ export async function checkClusterHealth(): Promise<string> {
     console.info('Cluster health:', response);
     return response;
   } catch (error) {
-    console.error('Error checking cluster health:', error);
-    return '';
+    console.error('Error checking cluster health');
+    return 'Error checking cluster health';
   }
 }
 
-export async function BulkStoreToDB(
-  validFiles: any,
-): Promise<void> {
+export async function BulkStoreToDB(validFiles: any): Promise<void> {
   try {
     if (validFiles.length == 0) {
       return;
@@ -25,7 +23,7 @@ export async function BulkStoreToDB(
   }
 }
 
-export async function DeleteDocumentWithId(Id : string): Promise<void> {
+export async function DeleteDocumentWithId(Id: string): Promise<void> {
   try {
     const index = 'openapi';
     const updatedDocument = {
@@ -44,7 +42,7 @@ export async function DeleteDocumentWithId(Id : string): Promise<void> {
   }
 }
 
-export async function CreateDocument(Id:string, document: any): Promise<void> {
+export async function CreateDocument(Id: string, document: any): Promise<void> {
   try {
     const index = 'openapi';
     await esClient.index({
@@ -61,7 +59,7 @@ export async function CreateDocument(Id:string, document: any): Promise<void> {
   }
 }
 
-export async function GetDocumentWithId(Id:string): Promise<any> {
+export async function GetDocumentWithId(Id: string): Promise<any> {
   try {
     const index = 'openapi';
     const document = await esClient.get({
@@ -73,4 +71,3 @@ export async function GetDocumentWithId(Id:string): Promise<any> {
     console.error('Error getting document from database:', error);
   }
 }
-

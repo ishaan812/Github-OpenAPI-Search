@@ -44,13 +44,13 @@ export async function queryBuilder(
   if (prompt == undefined) {
     prompt = '';
   }
-  let query : string;
-  let filter : string;
+  let query: string;
+  let filter: string;
   if (rootquery != undefined) {
     if (rootquery === 'openapi') {
-      query = 'openapi: 3'
+      query = 'openapi: 3';
     } else if (rootquery === 'swagger') {
-      query = '"swagger: \\"2"'
+      query = '"swagger: \\"2"';
     }
     return query;
   }
@@ -61,7 +61,7 @@ export async function queryBuilder(
   } else if (username != undefined) {
     filter += '+user:' + username + ' ';
   }
-  if(prompt) {
+  if (prompt) {
     // query = filter + prompt + ' "openapi: 3"';
     query = filter + prompt + ` "swagger: \\"2"`;
   } else {
@@ -71,9 +71,7 @@ export async function queryBuilder(
   return query;
 }
 
-export async function ValidateandStoreFiles(
-  files: any[],
-): Promise<any> {
+export async function ValidateandStoreFiles(files: any[]): Promise<any> {
   if (files.length == 0) {
     return;
   }

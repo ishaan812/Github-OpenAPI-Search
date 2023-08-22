@@ -3,7 +3,7 @@ import { Octokit } from 'octokit';
 import { activeSearch, passiveSearch } from './searchtools/search.js';
 import dotenv from 'dotenv';
 import es from 'elasticsearch';
-import { checkClusterHealth} from './DB/dbutils.js';
+import { checkClusterHealth } from './DB/dbutils.js';
 import { throttling } from '@octokit/plugin-throttling';
 import { retry } from '@octokit/plugin-retry';
 import { UpdateOpenAPIFiles } from './updatetools/update.js';
@@ -30,13 +30,13 @@ const octokit = new CustomOctokit({
   },
 });
 
-const app = express();
-// const esHost = process.env.ES_HOST || 'localhost';
-export const esClient = new es.Client({
-  host: 'http://elasticsearch:9200',
+const esHost = process.env.ES_HOST || 'localhost';
+const esClient = new es.Client({
+  host: 'http://' + esHost + ':9200',
   // log: 'trace',
 });
 
+const app = express();
 //TODO: Iterate on api endpoints
 app.get('/search', async (_req, _res) => {
   const query = _req.query.q as string;
@@ -72,10 +72,7 @@ app.use('/ping', async (_req, _res) => {
 });
 
 app.get('/', (_req, _res) => {
-  _res.send("Typescript with Node.js");
+  _res.sendFile('C:\\GSOC\\Github-OpenAPI-Search\\src\\templates\\index.html');
 });
 
-
-
-export default app;
-export { octokit };
+export { octokit, esClient, app };
