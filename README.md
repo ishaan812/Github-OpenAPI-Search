@@ -12,6 +12,7 @@ The project will consist of developing an open-source API that allows you to pas
 - Jest (For testing)
 - Docker
 - Python (Scripting)
+- ElasticSearch
 
 ## Dev Runbook 
 Dependancies: NodeJS 19, npm, Github APIKey
@@ -23,6 +24,9 @@ How to get a Github API Key: https://docs.github.com/en/authentication/keeping-y
 2. Make sure you have Docker installed locally.
 3. Run `docker compose up`
 4. Two Containers - Elasticsearch (The database container) and an instance of the server should have started.
+5. Now to load the database with OpenAPI Files, run 
+`python scripts/seed_script.py` from the root of the folder. (Takes around 2-3hrs) 
+(More configuration of organisation list you can edit the scripts/assets/organisations1.txt, scripts/assets/organisations2.txt is for the next 1000 organisations)
 
 ## Setting up the server manually
 
