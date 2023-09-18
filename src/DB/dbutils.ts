@@ -59,14 +59,14 @@ export async function CreateDocument(Id: string, document: any): Promise<void> {
   }
 }
 
-export async function GetDocumentWithId(Id: string): Promise<any> {
+export async function GetDocumentWithId(id: string): Promise<any> {
   try {
-    const index = 'openapi';
-    const document = await esClient.get({
-      index,
-      id: Id,
+    const response = await esClient.get({
+      index: 'openapi',
+      id: id,
     });
-    return document;
+    console.info(`Document with ID ${id} retrieved from the database.`);
+    return response;
   } catch (error) {
     console.error('Error getting document from database:', error);
   }

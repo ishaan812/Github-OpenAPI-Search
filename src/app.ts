@@ -3,13 +3,18 @@ import { Octokit } from 'octokit';
 import { activeSearch, passiveSearch } from './searchtools/search.js';
 import dotenv from 'dotenv';
 import es from 'elasticsearch';
-import { checkClusterHealth } from './DB/dbutils.js';
+import { checkClusterHealth, GetDocumentWithId } from './DB/dbutils.js';
 import { throttling } from '@octokit/plugin-throttling';
 import { retry } from '@octokit/plugin-retry';
 import { UpdateOpenAPIFiles } from './updatetools/update.js';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
 const CustomOctokit = Octokit.plugin(throttling as any, retry as any);
 dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const rootDir = path.join(__dirname);
 
 const octokit = new CustomOctokit({
   userAgent: 'github-openapi-search/v0.0.1',
@@ -37,14 +42,15 @@ const esClient = new es.Client({
 });
 
 const app = express();
-//TODO: Iterate on api endpoints
+app.set('view engine', 'pug');
+app.set('views', path.join(rootDir, 'templates'));
+
 app.get('/search', async (_req, _res) => {
   const query = _req.query.q as string;
   const results = await passiveSearch(query);
   _res.send(results);
 });
 
-//other names: openapi2db
 app.post('/openapi', async (_req, _res) => {
   const Repository = _req.query.repo as string;
   const Organisation = _req.query.org as string;
@@ -71,8 +77,24 @@ app.use('/ping', async (_req, _res) => {
   _res.send(response);
 });
 
+app.get('/openapi/:id', async (_req, _res) => {
+  const id = _req.params.id;
+  GetDocumentWithId(id).then((response) => {
+    _res.send(response);
+  });
+})
+
 app.get('/', (_req, _res) => {
-  _res.sendFile('C:\\GSOC\\Github-OpenAPI-Search\\src\\templates\\index.html');
+  const filePath = path.join(rootDir, 'templates', 'index.html');
+  _res.sendFile(filePath);
 });
+
+app.get('/file/:id', (_req, _res) => {
+  const id = _req.params.id;
+  GetDocumentWithId(id).then((response) => {
+    console.log(response)
+    _res.render('openapifile', {response: response})
+  });
+})
 
 export { octokit, esClient, app };

@@ -62,11 +62,11 @@ export async function queryBuilder(
     filter += '+user:' + username + ' ';
   }
   if (prompt) {
-    // query = filter + prompt + ' "openapi: 3"';
-    query = filter + prompt + ` "swagger: \\"2"`;
+    query = filter + prompt + ' "openapi: 3"';
+    // query = filter + prompt + ` "swagger: \\"2"`;
   } else {
-    // query = filter + ' "openapi: 3"';
-    query = filter + ' "swagger: \\"2"';
+    query = filter + ' "openapi: 3"';
+    // query = filter + ' "swagger: \\"2"';
   }
   return query;
 }

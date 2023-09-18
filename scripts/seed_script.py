@@ -34,7 +34,7 @@ def loadbyorganisations(filename):
 
 if __name__ == "__main__":
     #Get Open API files
-    loadbyorganisations("scripts/assets/organisations.txt")
+    loadbyorganisations("scripts/assets/organisations1.txt")
 
 #Have to load Swagger Files too
 #Load by Repository

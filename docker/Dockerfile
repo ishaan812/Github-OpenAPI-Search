@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:18-alpine
 
 WORKDIR /usr
 
@@ -10,4 +10,5 @@ COPY ./src ./src
 EXPOSE 8080
 
 RUN npm run build
+COPY ./src/templates ./build/src/templates
 CMD ["npm", "run", "start"]

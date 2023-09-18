@@ -84,7 +84,7 @@ export async function passiveSearch(query: string): Promise<any> {
         query: {
           simple_query_string: {
             query: query,
-            fields: ['data^1'],
+            fields: ['data^1', 'title^10','repository^10', 'owner^10', 'description^5'],
             default_operator: 'and',
           },
         },

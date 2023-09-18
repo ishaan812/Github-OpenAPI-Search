@@ -35,7 +35,7 @@ def get_orgs_from_page(url):
 
 all_orgs = []
 # URL of the webpage you want to scrape
-for i in range(1, 11):
+for i in range(11, 21):
     url = f"https://gitstar-ranking.com/organizations?page={i}"
     orgs = get_orgs_from_page(url)
     all_orgs.extend(orgs)
@@ -43,10 +43,11 @@ for i in range(1, 11):
 print(all_orgs)
 output_directory = "scripts/assets"
 os.makedirs(output_directory, exist_ok=True)
-output_file = os.path.join(output_directory, "organisations.txt")
+output_file = os.path.join(output_directory, "organisations2.txt")
 with open(output_file, "w") as file:
     for org in all_orgs:
         file.write(org + "\n")
+    file.close()
 
 
 

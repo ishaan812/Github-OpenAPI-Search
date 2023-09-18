@@ -1,4 +1,3 @@
-APIs.guru
 microsoft
 google
 apache
