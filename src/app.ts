@@ -46,7 +46,7 @@ const esClient = new es.Client({
 // Check for openapi.json in the contents of the repository
 // If it exists, then store in database with important content
 
-//TODO: change passive search to /search endpoint and activesearch to /active or /store endpoint
+
 app.use('/passive', async (_req, _res) => {
   const query = _req.query.q as string;
   const results = await passiveSearch(query, esClient);
