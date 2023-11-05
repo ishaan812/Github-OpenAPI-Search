@@ -5,7 +5,6 @@ import OASNormalize from 'oas-normalize';
 import { BulkStoreToDB } from '../DB/dbutils.js';
 
 export function generateUUID(): string {
-
   // Generate a random buffer of 16 bytes
   const buffer = crypto.randomBytes(16);
 
@@ -45,33 +44,36 @@ export async function queryBuilder(
   if (prompt == undefined) {
     prompt = '';
   }
-  let query;
+  let query: string;
+  let filter: string;
   if (rootquery != undefined) {
     if (rootquery === 'openapi') {
-      query = 'openapi: 3'
+      query = 'openapi: 3';
     } else if (rootquery === 'swagger') {
-      query = '"swagger: \\"2"'
+      query = '"swagger: \\"2"';
+    } else if(rootquery === 'asyncapi') {
+      query = 'asyncapi: 2';
     }
     return query;
   }
-  query = prompt + ' AND "openapi: 3"';
-  // query+= prompt + ' AND "swagger: \\"2"'
   if (repo != undefined) {
-    query += '+repo:' + repo;
+    filter = 'repo:' + repo + ' ';
   } else if (organisation != undefined) {
-    query += '+org:' + organisation;
+    filter = 'org:' + organisation + ' ';
   } else if (username != undefined) {
-    query += '+user:' + username;
+    filter += '+user:' + username + ' ';
+  }
+  if (prompt) {
+    query = filter + prompt + ' "openapi: 3"';
+    // query = filter + prompt + ` "swagger: \\"2"`;
   } else {
-    return query;
+    query = filter + ' "openapi: 3"';
+    // query = filter + ' "swagger: \\"2"';
   }
   return query;
 }
 
-
-export async function ValidateandStoreFiles(
-  files: any[],
-): Promise<any> {
+export async function ValidateandStoreFiles(files: any[]): Promise<any> {
   if (files.length == 0) {
     return;
   }
@@ -119,11 +121,10 @@ export async function ValidateandStoreFiles(
           validFiles = [];
         }
       })
-      .catch((error) => {
+      .catch(() => {
         console.info('File ' + file.name + ' is not valid');
       });
   }
   BulkStoreToDB(validFiles as any[]);
-
   return validFiles;
 }

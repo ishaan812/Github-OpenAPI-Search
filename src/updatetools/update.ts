@@ -6,14 +6,14 @@ export async function UpdateOpenAPIFiles(): Promise<string> {
     scroll: '30s',
     size: 1,
     _source: ['owner', 'repository', 'filepath', 'ETAG', 'isDeleted'],
-    body:{
+    body: {
       query: {
-        match_all: {}
-      }
-    }
-  }
+        match_all: {},
+      },
+    },
+  };
   for await (const hit of scrollSearch(params)) {
     await UpdateDocument(hit);
   }
-  return "Updated All OpenAPI Files";
+  return 'Updated All OpenAPI Files';
 }

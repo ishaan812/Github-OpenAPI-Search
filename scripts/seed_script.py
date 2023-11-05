@@ -4,14 +4,13 @@
 
 import requests
 
-def call_local_endpoint(prompt):
-    #TODO: Change this to the correct URL when activesearch endpoint is changed
-    url = f'http://localhost:8080/database?rootquery="{prompt}"'
 
+def call_local_endpoint(query):
+    url = f'http://localhost:8080/openapi?{query}'
+    print(f"Calling {url}")
     
     try:
-        response = requests.get(url)
-        
+        response = requests.post(url)
         # Check if the response was successful (status code 200)
         if response.status_code == 200:
             print("Request to localhost:8080/search was successful!")
@@ -23,11 +22,18 @@ def call_local_endpoint(prompt):
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
 
+def loadbyorganisations(filename):
+    orgs_array = []
+    with open(filename, 'r') as txtfile:
+        for line in txtfile:
+            orgs_array.append(line.strip())
+    for org in orgs_array:
+        query = f"org={org}"
+        call_local_endpoint(query)
+
+
 if __name__ == "__main__":
     #Get Open API files
-    call_local_endpoint('openapi: 3')
-    #Get Swagger files
-    # call_local_endpoint('"swagger: \"2"')
+    loadbyorganisations("scripts/assets/organisations1.txt")
 
 
-#PS: Takes a long time to run

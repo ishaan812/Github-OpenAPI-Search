@@ -1,0 +1,93 @@
+doctype html
+html
+  head
+    title API Showcase
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.5.0/dist/css/bootstrap.min.css")
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.5.0/dist/css/bootstrap.min.css")
+    style.
+      .truncate-text {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+      .json-pre {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        max-width: 60%;
+        word-wrap: break-word;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+  script.
+      | $(document).ready(function () {
+      |   // Truncate long text in servers and paths
+      |   $(".truncate-text").each(function () {
+      |     var maxLength = 200; 
+      |     var text = $(this).text();
+      |     if (text.length > maxLength) {
+      |       var truncatedText = text.substring(0, maxLength) + "...";
+      |       $(this).html(truncatedText);
+      |       $(this).addClass("text-truncate");
+      |     }
+      |   });
+      | 
+      |   // Add expand/collapse functionality to servers and paths
+      |   $(".truncate-text").on("click", function () {
+      |     var targetId = $(this).attr("data-target");
+      |     $(targetId).toggleClass("show");
+      |   });
+      | });
+      | async function getAvatarURL(organisation) {
+      |   try {
+      |    const response = await fetch(`https://api.github.com/orgs/${organisation}`);
+      |    const data = await response.json();
+      |    const avatarURL = data.avatar_url;
+      |    return avatarURL;
+      |  } catch (error) {
+      |    console.log(error);
+      |    return ""; 
+      |  }
+      | }
+      |
+  body
+    .container.mt-5(style="max-width: 80%; width: 80%;") 
+      h1.mb-4 API Showcase
+      .card
+        .card-body
+          h2.card-title ETAG: #{response._id}
+          img(src=await getAvatarURL(response._source.owner), alt="Avatar image")
+          .card-text
+            p Name: #{response._source.title}
+            p Description: #{response._source.description}
+            p Version: #{response._source.version}
+            p URL: #{response._source.URL}
+            p
+              | Servers:
+              span.truncate-text(data-toggle="collapse", data-target="#serversCollapse")
+                pre.json-pre
+                  | #{JSON.stringify(response._source.servers, null, 2)}
+            p
+              | Paths:
+              span.truncate-text.wrap-text(data-toggle="collapse", data-target="#pathsCollapse") Expand
+              .collapse#pathsCollapse
+                pre.json-pre
+                  | #{JSON.stringify(response._source.paths, null, 2)}
+            p | Data: 
+              span.truncate-text.wrap-text(data-toggle="collapse", data-target="#pathsCollapse") Expand
+              .collapse#dataCollapse
+                
+                  | #{JSON.stringify(response._source.data)}
+            p LastModified: #{response._source.LastModified}
+            p LastUpdated: #{response._source.LastUpdated}
+            //- p | Postman Collection:
+            //-   span.truncate-text.wrap-text(data-toggle="collapse", data-target="#pathsCollapse") Expand
+            //-   .collapse#PostmanCollapse
+            //-     pre.json-pre 
+            //-     #{JSON.stringify(collection)}
+    script(src="https://code.jquery.com/jquery-3.6.0.min.js") // Include jQuery
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.5.0/dist/js/bootstrap.bundle.min.js") // Include Bootstrap JS
+    

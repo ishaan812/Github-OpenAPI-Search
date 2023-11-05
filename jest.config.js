@@ -1,6 +1,7 @@
 export default {
   testEnvironment: 'node',
-  preset: 'ts-jest/presets/default-esm',
+  // setupFilesAfterEnv: ["<rootDir>/src/setupTests.ts"],
+  preset: 'ts-jest',
   transform: {
     '^.+\\.m?[tj]s?$': ['ts-jest', { useESM: true }],
   },

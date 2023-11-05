@@ -3,28 +3,36 @@ import { Octokit } from 'octokit';
 import { activeSearch, passiveSearch } from './searchtools/search.js';
 import dotenv from 'dotenv';
 import es from 'elasticsearch';
-import { checkClusterHealth} from './DB/dbutils.js';
+import { checkClusterHealth, GetDocumentWithId } from './DB/dbutils.js';
 import { throttling } from '@octokit/plugin-throttling';
 import { retry } from '@octokit/plugin-retry';
 import { UpdateOpenAPIFiles } from './updatetools/update.js';
+import { fileURLToPath } from 'url';
+import path from 'path';
+import Converter from 'openapi-to-postmanv2';
+import { makePostmanCollection } from './utils.js';
+
 
 const CustomOctokit = Octokit.plugin(throttling as any, retry as any);
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const rootDir = path.join(__dirname);
 
 const octokit = new CustomOctokit({
   userAgent: 'github-openapi-search/v0.0.1',
   auth: process.env.GITHUB_API_KEY,
   throttle: {
-    onRateLimit: (retryAfter, options) => {
+    onRateLimit: (retryAfter, options): boolean => {
+
       octokit.log.warn(
         `Request quota exhausted for request ${options.method} ${options.url}`,
       );
       console.info(`Retrying after ${retryAfter} seconds!`);
-
       return true;
     },
-    onSecondaryRateLimit: (retryAfter, options, octokit) => {
-      // does not retry, only logs a warning
+    onSecondaryRateLimit: (retryAfter, options, octokit): void => {
       octokit.log.warn(
         `Secondary quota detected for request ${options.method} ${options.url}`,
       );
@@ -32,41 +40,23 @@ const octokit = new CustomOctokit({
   },
 });
 
-const app = express();
 
-export const esClient = new es.Client({
-  host: 'http://localhost:9200',
+const esHost = process.env.ES_HOST || 'localhost';
+const esClient = new es.Client({
+  host: 'http://' + esHost + ':9200',
   // log: 'trace',
 });
 
-//TODO: Iterate on api endpoints
+const app = express();
+app.set('view engine', 'pug');
+app.set('views', path.join(rootDir, 'templates'));
 app.get('/search', async (_req, _res) => {
   const query = _req.query.q as string;
   const results = await passiveSearch(query);
   _res.send(results);
 });
 
-//openapi2db
 app.post('/openapi', async (_req, _res) => {
-const esClient = new es.Client({
-  host: 'http://localhost:9200',
-  log: 'trace',
-})
-});
-
-// Should not even be an API endpoint for passive search
-// Should just fetch repositories and go through them (with ETAG to make sure no repeats)
-// Check for openapi.json in the contents of the repository
-// If it exists, then store in database with important content
-
-
-app.use('/passive', async (_req, _res) => {
-  const query = _req.query.q as string;
-  const results = await passiveSearch(query);
-  _res.send(results);
-})
-
-app.use('/search', async (_req, _res) => {
   const Repository = _req.query.repo as string;
   const Organisation = _req.query.org as string;
   const User = _req.query.user as string;
@@ -82,7 +72,6 @@ app.use('/search', async (_req, _res) => {
   _res.send(results);
 });
 
-
 app.put('/openapi', async (_req, _res) => {
   const results = await UpdateOpenAPIFiles();
   _res.send(results);
@@ -94,11 +83,39 @@ app.use('/ping', async (_req, _res) => {
 });
 
 
+app.get('/openapi/:id', async (_req, _res) => {
+  const id = _req.params.id;
+  GetDocumentWithId(id).then((response) => {
+    _res.send(response);
+  });
+})
+
 app.get('/', (_req, _res) => {
-  _res.send('TypeScript With Express');
+  const filePath = path.join(rootDir, 'templates', 'index.html');
+  _res.sendFile(filePath);
 });
 
+app.get('/file/:id', (_req, _res) => {
+  const id = _req.params.id;
+  GetDocumentWithId(id).then((response) => {
+    console.log(response._source.data)
+    Converter.convert({ type: 'string', data: response._source.data }, {}, (err, conversionResult) => {
+      console.log('Conversion result:', conversionResult);
+      if (!conversionResult.result) {
+        console.log('Could not convert', conversionResult);
+        _res.render('openapifile', {response: response, collection: "Could not convert to Collection"})
+      }
+      else {
+        // console.log('The collection object is: ', conversionResult.output[0].data);
+        makePostmanCollection(conversionResult.output[0].data).then((collection) => {
+          console.log(collection);
+          _res.render('openapifile', {response: response, collection: conversionResult?.output[0].data})
+        });
+      }
+    }
+    );
+  });
+})
 
+export { octokit, esClient, app };
 
-export default app;
-export { octokit };

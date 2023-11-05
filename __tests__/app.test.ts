@@ -1,9 +1,12 @@
-import request from 'supertest';
-import app from '../src/app.js';
+import axios from 'axios';
 
-describe('Test app.ts', () => {
-  test('Catch-all route', async () => {
-    const res = request(app).get('/');
-    expect(res).toEqual('TypeScript With Express');
+describe('API Tests', () => {
+  test('GET /', async () => {
+    const response = await axios.get('http://localhost:8080/');
+    expect(response.status).toBe(200);
+  });
+  test('GET /ping', async () => {
+    const response = await axios.get('http://localhost:8080/ping');
+    expect(response.status).toBe(200);
   });
 });
