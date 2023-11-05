@@ -78,6 +78,7 @@ export async function passiveSearch(query: string): Promise<any> {
     }
     const result = await esClient.search({
       index: 'openapi',
+      filterPath : ['hits.hits._source'],
       body: {
         query: {
           simple_query_string: {
@@ -92,7 +93,7 @@ export async function passiveSearch(query: string): Promise<any> {
       if (result.hits.hits.length === 0) {
         console.error('No results found in the database');
       }
-      return result.hits.hits;
+      return result.hits.hits.map((hit: any) => hit._source);
     }
   } catch (error) {
     if (error.message.includes('No Living connections')) {
