@@ -48,12 +48,10 @@ app.get('/search', async (_req, _res) => {
 
 //openapi2db
 app.post('/openapi', async (_req, _res) => {
-=======
-
-
 const esClient = new es.Client({
   host: 'http://localhost:9200',
   log: 'trace',
+})
 });
 
 // Should not even be an API endpoint for passive search
@@ -64,7 +62,7 @@ const esClient = new es.Client({
 
 app.use('/passive', async (_req, _res) => {
   const query = _req.query.q as string;
-  const results = await passiveSearch(query, esClient);
+  const results = await passiveSearch(query);
   _res.send(results);
 })
 
@@ -80,7 +78,6 @@ app.use('/search', async (_req, _res) => {
     Organisation as string,
     User as string,
     RootQuery as string,
-    esClient as any,
   );
   _res.send(results);
 });
