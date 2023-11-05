@@ -9,13 +9,16 @@ import { retry } from '@octokit/plugin-retry';
 import { UpdateOpenAPIFiles } from './updatetools/update.js';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import Converter from 'openapi-to-postmanv2';
+import { makePostmanCollection } from './utils.js';
+
 
 const CustomOctokit = Octokit.plugin(throttling as any, retry as any);
 dotenv.config();
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.join(__dirname);
-
 const octokit = new CustomOctokit({
   userAgent: 'github-openapi-search/v0.0.1',
   auth: process.env.GITHUB_API_KEY,
@@ -92,9 +95,24 @@ app.get('/', (_req, _res) => {
 app.get('/file/:id', (_req, _res) => {
   const id = _req.params.id;
   GetDocumentWithId(id).then((response) => {
-    console.log(response)
-    _res.render('openapifile', {response: response})
+    console.log(response._source.data)
+    Converter.convert({ type: 'string', data: response._source.data }, {}, (err, conversionResult) => {
+      console.log('Conversion result:', conversionResult);
+      if (!conversionResult.result) {
+        console.log('Could not convert', conversionResult);
+        _res.render('openapifile', {response: response, collection: "Could not convert to Collection"})
+      }
+      else {
+        // console.log('The collection object is: ', conversionResult.output[0].data);
+        makePostmanCollection(conversionResult.output[0].data).then((collection) => {
+          console.log(collection);
+          _res.render('openapifile', {response: response, collection: conversionResult?.output[0].data})
+        });
+      }
+    }
+    );
   });
 })
+
 
 export { octokit, esClient, app };

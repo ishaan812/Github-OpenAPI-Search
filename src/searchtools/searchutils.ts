@@ -51,11 +51,13 @@ export async function queryBuilder(
       query = 'openapi: 3';
     } else if (rootquery === 'swagger') {
       query = '"swagger: \\"2"';
+    } else if(rootquery === 'asyncapi') {
+      query = 'asyncapi: 2';
     }
     return query;
   }
   if (repo != undefined) {
-    filter = '+repo:' + repo + ' ';
+    filter = 'repo:' + repo + ' ';
   } else if (organisation != undefined) {
     filter = 'org:' + organisation + ' ';
   } else if (username != undefined) {

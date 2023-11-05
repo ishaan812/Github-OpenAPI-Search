@@ -14,7 +14,6 @@
             <div class="col-md-3">
                 <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                     <button class="nav-link active" id="passiveSearch-tab" data-bs-toggle="pill" data-bs-target="#passiveSearch" type="button" role="tab" aria-controls="passiveSearch" aria-selected="true">Passive Search</button>
-                    <button class="nav-link" id="activeSearch-tab" data-bs-toggle="pill" data-bs-target="#activeSearch" type="button" role="tab" aria-controls="activeSearch" aria-selected="false">Active Search</button>
                     <button class="nav-link" id="updateOpenAPI-tab" data-bs-toggle="pill" data-bs-target="#updateOpenAPI" type="button" role="tab" aria-controls="updateOpenAPI" aria-selected="false">Update OpenAPI</button>
                     <button class="nav-link" id="checkClusterHealth-tab" data-bs-toggle="pill" data-bs-target="#checkClusterHealth" type="button" role="tab" aria-controls="checkClusterHealth" aria-selected="false">Check Cluster Health</button>
                 </div>
@@ -50,12 +49,12 @@
                         <div id="activeSearchResults"></div>
                     </div>
                     <div class="tab-pane fade" id="updateOpenAPI" role="tabpanel" aria-labelledby="updateOpenAPI-tab">
-                        <h2 class="mt-4">Update OpenAPI Files</h2>
+                        <h2 class="mt-4">Update OpenAPI Files Database</h2>
                         <button class="btn btn-primary" id="updateOpenAPIButton">Update</button>
                         <div id="updateOpenAPIResults"></div>
                     </div>
                     <div class="tab-pane fade" id="checkClusterHealth" role="tabpanel" aria-labelledby="checkClusterHealth-tab">
-                        <h2 class="mt-4">Check Cluster Health</h2>
+                        <h2 class="mt-4">Check Elasticsearch Cluster Health</h2>
                         <button class="btn btn-primary" id="checkClusterHealthButton">Check</button>
                         <div id="checkClusterHealthResults"></div>
                     </div>
@@ -235,8 +234,19 @@
       // Function to handle check cluster health
       checkClusterHealthButton.addEventListener('click', async () => {
         fetch('/ping').then((res) => {
-          console.log(res.body);
-          checkClusterHealthResults.textContent = res.body;
+          const reader = stream.getReader();
+          const read = () => {
+            return reader.read().then(({ done, value }) => {
+              if (done) {
+                return result;
+              }
+              result += value;
+              return read();
+            });
+          };
+          read().then((result) => {
+            checkClusterHealthResults.textContent = result;
+          });
         })
       });
     </script>
