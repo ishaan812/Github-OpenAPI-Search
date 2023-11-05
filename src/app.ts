@@ -4,7 +4,6 @@ import { activeSearch, passiveSearch } from './searchtools/search.js';
 import dotenv from 'dotenv';
 import es from 'elasticsearch';
 import { checkClusterHealth } from './DB/dbutils.js';
-// import { router as userRoutes } from "./routes/user.routes.js";
 import { throttling } from '@octokit/plugin-throttling'
 import { retry } from '@octokit/plugin-retry'
 
@@ -47,6 +46,7 @@ const esClient = new es.Client({
 // Check for openapi.json in the contents of the repository
 // If it exists, then store in database with important content
 
+
 app.use('/passive', async (_req, _res) => {
   const query = _req.query.q as string;
   const results = await passiveSearch(query, esClient);
@@ -58,11 +58,13 @@ app.use('/search', async (_req, _res) => {
   const Organisation = _req.query.org as string;
   const User = _req.query.user as string;
   const Prompt = _req.query.prompt as string;
+  const RootQuery = _req.query.rootquery as string;
   const results = await activeSearch(
     Prompt as string,
     Repository as string,
     Organisation as string,
     User as string,
+    RootQuery as string,
     esClient as any,
   );
   _res.send(results);

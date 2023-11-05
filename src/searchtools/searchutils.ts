@@ -37,11 +37,16 @@ export async function getFileContents(
   return response.data['content'];
 }
 
-export async function queryBuilder(prompt: string, repo: string, organisation: string, username: string): Promise<string> {
+export async function queryBuilder(prompt: string, repo: string, organisation: string, username: string, rootquery: string): Promise<string> {
   if(prompt == undefined){
     prompt = "" 
   }
-  let query = prompt + ' AND "openapi: 3"';
+  let query
+  if(rootquery != undefined){
+    query = rootquery
+    return query
+  }
+  query = prompt + ' AND "openapi: 3"';
     // query+= prompt + ' AND "swagger: \\"2"'
   if (repo != undefined) {
     query += '+repo:' + repo;

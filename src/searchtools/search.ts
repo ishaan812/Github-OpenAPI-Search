@@ -10,31 +10,38 @@ export async function activeSearch(
   repo: string,
   organisation: string,
   username: string,
+  rootquery: string,
   esClient: any,
 ): Promise<any> {
-  const query = await queryBuilder(prompt, repo, organisation, username);
+  const query = await queryBuilder(prompt, repo, organisation, username, rootquery);
   let files = [];
   let validFiles = [];
+  console.log("Query: "+query)
   await octokit.paginate(octokit.rest.search.code, {
     q: query,
     per_page: 100
   },
   (response : any) => {
     files = files.concat(response.data)
-    if(files.length >= 500){
-      console.log("Validating and storing files since rate limit reached")
+    if(files.length >= 200){
       processCount++;
+      console.log("ValidateandStoreFiles Process Number "+processCount+" Started")
       ValidateandStoreFiles(files, esClient).then((validatedFiles) => {
         validFiles = validFiles.concat(validatedFiles);
         finishedCount++;
+        console.log("ValidateandStoreFiles Process Number "+finishedCount+" Started")
       });
       files = []
     }
   }
   );
   //this ending before the above one
+  processCount++;
+  console.log("ValidateandStoreFiles Process Number "+processCount+" Started")
   ValidateandStoreFiles(files, esClient).then((validatedFiles) => {
     validFiles = validFiles.concat(validatedFiles);
+    console.log("ValidateandStoreFiles Process Number "+finishedCount+" Started")
+    finishedCount++;
   });
   while(processCount > finishedCount){
     await new Promise(r => setTimeout(r, 3000));
