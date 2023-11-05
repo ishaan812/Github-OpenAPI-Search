@@ -3,11 +3,10 @@ import { Octokit } from 'octokit';
 import { activeSearch, passiveSearch } from './searchtools/search.js';
 import dotenv from 'dotenv';
 import es from 'elasticsearch';
-import { checkClusterHealth } from './DB/dbutils.js';
-import { throttling } from '@octokit/plugin-throttling'
-import { retry } from '@octokit/plugin-retry'
-
-
+import { checkClusterHealth} from './DB/dbutils.js';
+import { throttling } from '@octokit/plugin-throttling';
+import { retry } from '@octokit/plugin-retry';
+import { UpdateOpenAPIFiles } from './updatetools/update.js';
 
 const CustomOctokit = Octokit.plugin(throttling as any, retry as any);
 dotenv.config();
@@ -20,7 +19,8 @@ const octokit = new CustomOctokit({
       octokit.log.warn(
         `Request quota exhausted for request ${options.method} ${options.url}`,
       );
-      console.log(`Retrying after ${retryAfter} seconds!`);
+      console.info(`Retrying after ${retryAfter} seconds!`);
+
       return true;
     },
     onSecondaryRateLimit: (retryAfter, options, octokit) => {
@@ -34,6 +34,21 @@ const octokit = new CustomOctokit({
 
 const app = express();
 
+export const esClient = new es.Client({
+  host: 'http://localhost:9200',
+  // log: 'trace',
+});
+
+//TODO: Iterate on api endpoints
+app.get('/search', async (_req, _res) => {
+  const query = _req.query.q as string;
+  const results = await passiveSearch(query);
+  _res.send(results);
+});
+
+//openapi2db
+app.post('/openapi', async (_req, _res) => {
+=======
 
 
 const esClient = new es.Client({
@@ -70,14 +85,23 @@ app.use('/search', async (_req, _res) => {
   _res.send(results);
 });
 
+
+app.put('/openapi', async (_req, _res) => {
+  const results = await UpdateOpenAPIFiles();
+  _res.send(results);
+});
+
 app.use('/ping', async (_req, _res) => {
-  const response = await checkClusterHealth(esClient);
+  const response = await checkClusterHealth();
   _res.send(response);
-})
+});
+
 
 app.get('/', (_req, _res) => {
   _res.send('TypeScript With Express');
 });
+
+
 
 export default app;
 export { octokit };

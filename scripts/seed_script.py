@@ -6,7 +6,8 @@ import requests
 
 def call_local_endpoint(prompt):
     #TODO: Change this to the correct URL when activesearch endpoint is changed
-    url = f'http://localhost:8080/search?rootquery="{prompt}"'
+    url = f'http://localhost:8080/database?rootquery="{prompt}"'
+
     
     try:
         response = requests.get(url)
@@ -24,8 +25,9 @@ def call_local_endpoint(prompt):
 
 if __name__ == "__main__":
     #Get Open API files
-    call_local_endpoint("openapi: 3")
+    call_local_endpoint('openapi: 3')
     #Get Swagger files
-    call_local_endpoint("swagger: 2")
+    # call_local_endpoint('"swagger: \"2"')
+
 
 #PS: Takes a long time to run
