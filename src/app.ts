@@ -20,6 +20,7 @@ const octokit = new CustomOctokit({
         `Request quota exhausted for request ${options.method} ${options.url}`,
       );
       console.info(`Retrying after ${retryAfter} seconds!`);
+
       return true;
     },
     onSecondaryRateLimit: (retryAfter, options, octokit) => {
@@ -47,6 +48,27 @@ app.get('/search', async (_req, _res) => {
 
 //openapi2db
 app.post('/openapi', async (_req, _res) => {
+=======
+
+
+const esClient = new es.Client({
+  host: 'http://localhost:9200',
+  log: 'trace',
+});
+
+// Should not even be an API endpoint for passive search
+// Should just fetch repositories and go through them (with ETAG to make sure no repeats)
+// Check for openapi.json in the contents of the repository
+// If it exists, then store in database with important content
+
+
+app.use('/passive', async (_req, _res) => {
+  const query = _req.query.q as string;
+  const results = await passiveSearch(query, esClient);
+  _res.send(results);
+})
+
+app.use('/search', async (_req, _res) => {
   const Repository = _req.query.repo as string;
   const Organisation = _req.query.org as string;
   const User = _req.query.user as string;
@@ -58,9 +80,11 @@ app.post('/openapi', async (_req, _res) => {
     Organisation as string,
     User as string,
     RootQuery as string,
+    esClient as any,
   );
   _res.send(results);
 });
+
 
 app.put('/openapi', async (_req, _res) => {
   const results = await UpdateOpenAPIFiles();
@@ -71,6 +95,7 @@ app.use('/ping', async (_req, _res) => {
   const response = await checkClusterHealth();
   _res.send(response);
 });
+
 
 app.get('/', (_req, _res) => {
   _res.send('TypeScript With Express');

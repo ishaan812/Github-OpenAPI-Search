@@ -4,6 +4,7 @@ import { octokit, esClient } from '../app.js';
 let processCount = 0;
 let finishedCount = 0;
 
+
 export async function activeSearch(
   prompt: string,
   repo: string,
@@ -68,6 +69,7 @@ export async function activeSearch(
         finishedCount,
     );
     console.info('Waiting for all files to be processed');
+
   }
   return validFiles;
 }
@@ -85,6 +87,7 @@ export async function passiveSearch(
         query: {
           simple_query_string: {
             query: query,
+
             fields: ['title^3', 'servers^2', 'paths^1.5', 'data^1'],
             default_operator: 'and',
           },
@@ -100,13 +103,16 @@ export async function passiveSearch(
     }
   } catch (error) {
     if (error.message.includes('No Living connections')) {
+
       console.error('Elasticsearch connection error:', error);
       return error;
     } else {
       console.error('Error occurred during passive search:', error);
       return error;
+
     }
   }
 
   return 'Database not found';
 }
+

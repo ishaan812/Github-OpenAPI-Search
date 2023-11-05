@@ -5,6 +5,7 @@ import OASNormalize from 'oas-normalize';
 import { BulkStoreToDB } from '../DB/dbutils.js';
 
 export function generateUUID(): string {
+
   // Generate a random buffer of 16 bytes
   const buffer = crypto.randomBytes(16);
 
@@ -67,6 +68,7 @@ export async function queryBuilder(
   return query;
 }
 
+
 export async function ValidateandStoreFiles(
   files: any[],
 ): Promise<any> {
@@ -122,5 +124,6 @@ export async function ValidateandStoreFiles(
       });
   }
   BulkStoreToDB(validFiles as any[]);
+
   return validFiles;
 }
