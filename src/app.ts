@@ -11,6 +11,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import Converter from 'openapi-to-postmanv2';
 import { makePostmanCollection } from './utils.js';
+import { openAPIQueryBuilder } from './searchtools/openAPISearchUtils.js';
 
 
 const CustomOctokit = Octokit.plugin(throttling as any, retry as any);
@@ -44,12 +45,14 @@ const octokit = new CustomOctokit({
 const esHost = process.env.ES_HOST || 'localhost';
 const esClient = new es.Client({
   host: 'http://' + esHost + ':9200',
+  // uncomment for debugging
   // log: 'trace',
 });
 
 const app = express();
 app.set('view engine', 'pug');
 app.set('views', path.join(rootDir, 'templates'));
+
 app.get('/search', async (_req, _res) => {
   const query = _req.query.q as string;
   const results = await passiveSearch(query);
@@ -62,12 +65,16 @@ app.post('/openapi', async (_req, _res) => {
   const User = _req.query.user as string;
   const Prompt = _req.query.prompt as string;
   const RootQuery = _req.query.rootquery as string;
+  const query = await openAPIQueryBuilder(
+    Prompt,
+    Repository,
+    Organisation,
+    User,
+    RootQuery,
+  );
   const results = await activeSearch(
-    Prompt as string,
-    Repository as string,
-    Organisation as string,
-    User as string,
-    RootQuery as string,
+    query as string,
+    'openapi'
   );
   _res.send(results);
 });
@@ -81,7 +88,6 @@ app.use('/ping', async (_req, _res) => {
   const response = await checkClusterHealth();
   _res.send(response);
 });
-
 
 app.get('/openapi/:id', async (_req, _res) => {
   const id = _req.params.id;

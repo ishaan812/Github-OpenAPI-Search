@@ -34,7 +34,7 @@ export async function getFileContents(
   return response;
 }
 
-export async function queryBuilder(
+export async function openAPIQueryBuilder(
   prompt: string,
   repo: string,
   organisation: string,
@@ -73,7 +73,7 @@ export async function queryBuilder(
   return query;
 }
 
-export async function ValidateandStoreFiles(files: any[]): Promise<any> {
+export async function openAPIValidateandStoreFiles(files: any[]): Promise<any> {
   if (files.length == 0) {
     return;
   }

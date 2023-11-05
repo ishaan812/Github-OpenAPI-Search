@@ -1,26 +1,17 @@
-import { queryBuilder, ValidateandStoreFiles } from './searchutils.js';
+import { openAPIValidateandStoreFiles } from './openAPISearchUtils.js';
 import { octokit, esClient } from '../app.js';
 
 let processCount = 0;
 let finishedCount = 0;
 
 export async function activeSearch(
-  prompt: string,
-  repo: string,
-  organisation: string,
-  username: string,
-  rootquery: string,
+  query: string,
+  type: string,
 ): Promise<any> {
-  const query = await queryBuilder(
-    prompt,
-    repo,
-    organisation,
-    username,
-    rootquery,
-  );
+  console.log(type)
+  console.info('Query: ' + query);
   let files = [];
   let validFiles = [];
-  console.info('Query: ' + query);
   await octokit.paginate(
     octokit.rest.search.code,
     {
@@ -34,15 +25,19 @@ export async function activeSearch(
         console.info(
           'ValidateandStoreFiles Process Number ' + processCount + ' Started',
         );
-        ValidateandStoreFiles(files).then((validatedFiles) => {
-          validFiles = validFiles.concat(validatedFiles);
-          finishedCount++;
-          console.info(
-            'ValidateandStoreFiles Process Number ' +
-              finishedCount +
-              ' Finished',
-          );
-        });
+        switch (type) {
+          case 'openapi':
+            openAPIValidateandStoreFiles(files).then((validatedFiles) => {
+              validFiles = validFiles.concat(validatedFiles);
+              finishedCount++;
+              console.info(
+                'ValidateandStoreFiles Process Number ' +
+                  finishedCount +
+                  ' Finished',
+              );
+            });
+            break;
+        }
         files = [];
       }
     },
@@ -52,13 +47,16 @@ export async function activeSearch(
   console.info(
     'ValidateandStoreFiles Process Number ' + processCount + ' Started',
   );
-  ValidateandStoreFiles(files).then((validatedFiles) => {
-    validFiles = validFiles.concat(validatedFiles);
-    console.info(
-      'ValidateandStoreFiles Process Number ' + finishedCount + ' Finished',
-    );
-    finishedCount++;
-  });
+  switch (type) {
+    case 'openapi':
+      openAPIValidateandStoreFiles(files).then((validatedFiles) => {
+        validFiles = validFiles.concat(validatedFiles);
+        console.info(
+          'ValidateandStoreFiles Process Number ' + finishedCount + ' Finished',
+        );
+        finishedCount++;
+      });
+  }
   while (processCount > finishedCount) {
     await new Promise((r) => setTimeout(r, 5000));
     console.info(
