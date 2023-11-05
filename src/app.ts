@@ -19,11 +19,13 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.join(__dirname);
+
 const octokit = new CustomOctokit({
   userAgent: 'github-openapi-search/v0.0.1',
   auth: process.env.GITHUB_API_KEY,
   throttle: {
     onRateLimit: (retryAfter, options): boolean => {
+
       octokit.log.warn(
         `Request quota exhausted for request ${options.method} ${options.url}`,
       );
@@ -38,6 +40,7 @@ const octokit = new CustomOctokit({
   },
 });
 
+
 const esHost = process.env.ES_HOST || 'localhost';
 const esClient = new es.Client({
   host: 'http://' + esHost + ':9200',
@@ -47,7 +50,6 @@ const esClient = new es.Client({
 const app = express();
 app.set('view engine', 'pug');
 app.set('views', path.join(rootDir, 'templates'));
-
 app.get('/search', async (_req, _res) => {
   const query = _req.query.q as string;
   const results = await passiveSearch(query);
@@ -79,6 +81,7 @@ app.use('/ping', async (_req, _res) => {
   const response = await checkClusterHealth();
   _res.send(response);
 });
+
 
 app.get('/openapi/:id', async (_req, _res) => {
   const id = _req.params.id;
@@ -114,5 +117,5 @@ app.get('/file/:id', (_req, _res) => {
   });
 })
 
-
 export { octokit, esClient, app };
+

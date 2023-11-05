@@ -1,5 +1,6 @@
 import { esClient } from '../app.js';
 
+
 export async function checkClusterHealth(): Promise<string> {
   try {
     const response = await esClient.cat.health();
@@ -22,6 +23,7 @@ export async function BulkStoreToDB(validFiles: any): Promise<void> {
     console.error('Error bulk indexing:', error);
   }
 }
+
 
 export async function DeleteDocumentWithId(Id: string): Promise<void> {
   try {
@@ -71,3 +73,4 @@ export async function GetDocumentWithId(id: string): Promise<any> {
     console.error('Error getting document from database:', error);
   }
 }
+

@@ -1,3 +1,4 @@
+
 import OASNormalize from 'oas-normalize';
 import { octokit, esClient } from '../app.js';
 import { DeleteDocumentWithId, CreateDocument } from '../DB/dbutils.js';
@@ -110,3 +111,4 @@ export async function UpdateDocument(document: any): Promise<void> {
       }
     });
 }
+

@@ -28,7 +28,6 @@ export async function activeSearch(
       per_page: 100,
     },
     (response: any) => {
-      console.log(response);
       files = files.concat(response.data);
       if (files.length >= 200) {
         processCount++;
@@ -73,6 +72,7 @@ export async function activeSearch(
   return validFiles;
 }
 
+
 export async function passiveSearch(query: string): Promise<any> {
   try {
     if (esClient === undefined) {
@@ -105,6 +105,5 @@ export async function passiveSearch(query: string): Promise<any> {
       return error;
     }
   }
-
   return 'Database not found';
 }

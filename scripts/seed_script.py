@@ -4,13 +4,13 @@
 
 import requests
 
+
 def call_local_endpoint(query):
     url = f'http://localhost:8080/openapi?{query}'
     print(f"Calling {url}")
     
     try:
         response = requests.post(url)
-        
         # Check if the response was successful (status code 200)
         if response.status_code == 200:
             print("Request to localhost:8080/search was successful!")
@@ -36,5 +36,4 @@ if __name__ == "__main__":
     #Get Open API files
     loadbyorganisations("scripts/assets/organisations1.txt")
 
-#Have to load Swagger Files too
-#Load by Repository
+
